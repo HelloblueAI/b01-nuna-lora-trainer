@@ -37,7 +37,7 @@ def _write_run_log(output: Path, payload: dict[str, Any]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Single-GPU TinyLlama LoRA (TRL SFT). Not helloblue.ai production chat."
+        description="Single-GPU TinyLlama PEFT LoRA (TRL SFT)."
     )
     parser.add_argument("--config", type=Path, default=Path("configs/default.yaml"))
     parser.add_argument("--data", type=Path, default=Path("datasets/train.json"))
@@ -63,22 +63,26 @@ def main(argv: list[str] | None = None) -> int:
         "seed": seed,
         "base_model": cfg.get("base_model"),
         "dry_run": bool(args.dry_run),
-        "note": (
-            "Smoke/SFT scale only. Official helloblue.ai chat is Groq orchestration, not this adapter."
-        ),
+        "note": "Smoke/SFT scale. Promote Hub tags only after generation eval.",
     }
     _write_run_log(args.output, run_log)
-    print(json.dumps({k: run_log[k] for k in ("command", "n_examples", "seed", "base_model")}, indent=2))
+    print(
+        json.dumps(
+            {k: run_log[k] for k in ("command", "n_examples", "seed", "base_model")},
+            indent=2,
+        )
+    )
 
     if args.dry_run:
         print(f"dry-run ok → {args.output / 'train_run.json'}")
         return 0
 
     import torch
-    from datasets import Dataset
     from peft import LoraConfig, TaskType
     from transformers import AutoTokenizer, TrainerCallback
     from trl import SFTConfig, SFTTrainer
+
+    from datasets import Dataset
 
     if not torch.cuda.is_available():
         raise SystemExit("CUDA is required for training. Use --dry-run without a GPU.")

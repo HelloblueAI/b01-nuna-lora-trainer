@@ -1,5 +1,7 @@
 # b01-nuna-lora-trainer
 
+Single-GPU PEFT LoRA SFT for [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) (chat templates, eval gate).
+
 ## Community
 
 - Data and evals: [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`datasets/community/`](./datasets/community/), [`GOVERNANCE.md`](./GOVERNANCE.md)
@@ -27,6 +29,8 @@ CPU CI / laptops:
 
 ```bash
 pip install -e ".[dev]"
+ruff check .
+pytest
 python -m b01_nuna_lora.train --dry-run
 python -m b01_nuna_lora.eval --check-only
 ```
@@ -54,11 +58,7 @@ python -m b01_nuna_lora.upload --adapter outputs/adapter --repo helloblueai/B01-
 
 ## Dataset
 
-Bundled JSON is **Helloblue-authored MIT smoke SFT** (`datasets/README.md`). It is enough to exercise the CLI, not a pretraining mix.
-
-## What stays closed
-
-`HelloblueAI/B01.beta`, Groq routing, cloud GPU job orchestration, and live chats.
+Bundled JSON is Helloblue-authored MIT smoke SFT ([`datasets/README.md`](./datasets/README.md)). Enough to exercise the CLI, not a pretraining mix. New examples go in [`datasets/community/`](./datasets/community/).
 
 ## License
 

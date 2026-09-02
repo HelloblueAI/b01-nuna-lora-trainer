@@ -1,12 +1,10 @@
 from pathlib import Path
-import sys
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
 
 import pytest
 
 from b01_nuna_lora.data import load_records, record_to_messages
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_record_to_messages_from_alpaca():
@@ -21,6 +19,11 @@ def test_load_identity_seed():
     records = load_records(ROOT / "datasets/identity-seed.json")
     assert len(records) >= 10
     assert "messages" in records[0]
+
+
+def test_load_train_split():
+    records = load_records(ROOT / "datasets/train.json")
+    assert len(records) >= 20
 
 
 def test_load_records_rejects_short_file(tmp_path: Path):

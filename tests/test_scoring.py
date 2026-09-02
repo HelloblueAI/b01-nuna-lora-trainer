@@ -1,10 +1,8 @@
 from pathlib import Path
-import sys
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
 
 from b01_nuna_lora.scoring import load_probes, require_passing_report, score_completion
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_identity_probe_passes():
@@ -39,7 +37,9 @@ def test_eval_probes_file_loads():
 
 def test_require_passing_rejects_check_only(tmp_path: Path):
     path = tmp_path / "report.json"
-    path.write_text('{"mode": "check-only", "summary": {"ok": true, "total": 1, "passed": 1}}\n')
+    path.write_text(
+        '{"mode": "check-only", "summary": {"ok": true, "total": 1, "passed": 1}}\n'
+    )
     try:
         require_passing_report(path)
         raise AssertionError("expected SystemExit")
