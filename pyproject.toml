@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "b01-nuna-lora-trainer"
+version = "0.1.0"
+description = "Single-GPU PEFT LoRA trainer (TinyLlama). R&D only — not production NUna chat."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Helloblue Inc" }]
+dependencies = [
+  "transformers>=4.35.0",
+  "datasets>=2.14.0",
+  "accelerate>=0.24.0",
+  "peft>=0.6.0",
+  "safetensors>=0.4.0",
+  "huggingface_hub>=0.23.0",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+b01-nuna-train = "b01_nuna_lora.train:main"
+b01-nuna-upload = "b01_nuna_lora.upload:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

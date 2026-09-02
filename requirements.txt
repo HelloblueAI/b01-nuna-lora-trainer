@@ -1,0 +1,12 @@
+# Install CUDA PyTorch first (see README), then:
+#   pip install -e ".[dev]"
+#
+# torch is not pinned here so you can choose cu121 / cu124 / CPU.
+
+transformers>=4.35.0
+datasets>=2.14.0
+accelerate>=0.24.0
+peft>=0.6.0
+safetensors>=0.4.0
+huggingface_hub>=0.23.0
+pyyaml>=6.0
