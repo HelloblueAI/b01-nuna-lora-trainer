@@ -1,17 +1,11 @@
-# B01-NUna LoRA trainer
-
-Public **workshop** for growing **B01-NUna weights** (TinyLlama PEFT LoRA).
-
-**helloblue.ai production chat is not this repo.** The product uses closed Groq orchestration. Do not send product code, keys, or user logs here.
-
-This is **not** Llama 4 / DeepSeek / Kimi. Those labs ship large open weights trained at cluster scale. This repo is a **small, honest SFT LoRA** plus a contribution path so the community can improve **the adapter**, while Helloblue Inc promotes official Hub tags after eval.
+# b01-nuna-lora-trainer
 
 ## Community
 
-- Data and evals: `CONTRIBUTING.md`, `datasets/community/`, `GOVERNANCE.md`
-- License: MIT (`LICENSE`)
-- Conduct: `CODE_OF_CONDUCT.md`
-- Model card (Hub copy): `MODEL_CARD.md`
+- Data and evals: [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`datasets/community/`](./datasets/community/), [`GOVERNANCE.md`](./GOVERNANCE.md)
+- License: MIT ([`LICENSE`](./LICENSE))
+- Conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- Model card (Hub copy): [`MODEL_CARD.md`](./MODEL_CARD.md)
 
 ## Requirements
 
@@ -68,4 +62,4 @@ Bundled JSON is **Helloblue-authored MIT smoke SFT** (`datasets/README.md`). It 
 
 ## License
 
-MIT — see `LICENSE`.
+This project is licensed under the MIT License. The full text is in [`LICENSE`](./LICENSE) at the repository root.
