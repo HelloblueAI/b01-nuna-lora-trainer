@@ -1,0 +1,19 @@
+---
+name: Bug
+description: Trainer, eval, or docs bug
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Do not paste helloblue.ai secrets, Groq keys, or user chats.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Repro
+      description: Command line, OS, GPU, adapter commit if any.
+    validations:
+      required: true

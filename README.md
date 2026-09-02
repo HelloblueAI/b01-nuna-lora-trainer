@@ -1,18 +1,23 @@
-# b01-nuna-lora-trainer
+# B01-NUna LoRA trainer
 
-Single-GPU **PEFT LoRA** trainer for [TinyLlama/TinyLlama-1.1B-Chat-v1.0](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0).
+Public **workshop** for growing **B01-NUna weights** (TinyLlama PEFT LoRA).
 
-This is **research tooling**, not [helloblue.ai](https://helloblue.ai) production chat. Production NUna uses Groq orchestration. A TinyLlama adapter will not match a 70B API model.
+**helloblue.ai production chat is not this repo.** The product uses closed Groq orchestration. Do not send product code, keys, or user logs here.
 
-**Do not train on live user chats** unless you have a lawful basis and the data is not in git. The bundled dataset is a curated identity seed only.
+This is **not** Llama 4 / DeepSeek / Kimi. Those labs ship large open weights trained at cluster scale. This repo is a **small, honest SFT LoRA** plus a contribution path so the community can improve **the adapter**, while Helloblue Inc promotes official Hub tags after eval.
+
+## Community
+
+- Data and evals: `CONTRIBUTING.md`, `datasets/community/`, `GOVERNANCE.md`
+- License: MIT (`LICENSE`)
+- Conduct: `CODE_OF_CONDUCT.md`
+- Model card (Hub copy): `MODEL_CARD.md`
 
 ## Requirements
 
-- Linux, NVIDIA GPU + CUDA (tested around 8GB VRAM)
+- Linux, NVIDIA GPU + CUDA (~8GB) for **train** / **generation eval**
 - Python 3.10+
-- A Hugging Face-compatible base model (default TinyLlama)
-
-AMD / dual-GPU / Colossal / Ollama import are **not** in this repo.
+- `--dry-run` and `--check-only` work without a GPU (CI)
 
 ## Setup
 
@@ -21,54 +26,45 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install -e .
-python -c "import torch; print('CUDA:', torch.cuda.is_available())"
+pip install -e ".[dev]"
 ```
 
-## Train
+CPU CI / laptops:
+
+```bash
+pip install -e ".[dev]"
+python -m b01_nuna_lora.train --dry-run
+python -m b01_nuna_lora.eval --check-only
+```
+
+## Train (GPU)
 
 ```bash
 python -m b01_nuna_lora.train \
   --config configs/default.yaml \
-  --data datasets/identity-seed.json \
+  --data datasets/train.json \
   --output outputs/adapter
 ```
 
-Expect `adapter_model.safetensors` and `adapter_config.json` under `--output`.
+Uses TRL `SFTTrainer` and the base tokenizer **chat template**. Writes `outputs/adapter/train_run.json` (command, seed, data path).
 
-## Upload (opt-in, off by default)
+## Eval gate (GPU) then upload (opt-in)
 
 ```bash
+python -m b01_nuna_lora.eval --adapter outputs/adapter --report outputs/eval_report.json
 export HF_TOKEN=hf_...
-python -m b01_nuna_lora.upload \
-  --adapter outputs/adapter \
-  --repo your-username/tinyllama-lora-rd \
-  --private
+python -m b01_nuna_lora.upload --adapter outputs/adapter --repo helloblueai/B01-NUna --private
 ```
 
-`--private` is the default. Do not publish weights until you have evalled them.
+`--private` is default. Public Hub tags are maintainer-only after generation eval. `--allow-unverified-upload` skips the gate and must not be used for public tags.
 
-## Dataset format
+## Dataset
 
-JSON array:
+Bundled JSON is **Helloblue-authored MIT smoke SFT** (`datasets/README.md`). It is enough to exercise the CLI, not a pretraining mix.
 
-```json
-[
-  {
-    "instruction": "Who are you?",
-    "input": "",
-    "output": "I'm B01, an AI assistant developed by Helloblue."
-  }
-]
-```
+## What stays closed
 
-From the private B01-NUna app (sibling `B01.beta` checkout):
-
-```bash
-pnpm run training:export-lora-dataset -- --out ../b01-nuna-lora-trainer/datasets/identity-seed.json
-# live chats (do not commit):
-pnpm run training:export-lora-dataset -- --include-live --out data/lora-trainer-export.json
-```
+`HelloblueAI/B01.beta`, Groq routing, cloud GPU job orchestration, and live chats.
 
 ## License
 

@@ -1,25 +1,26 @@
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 
 import pytest
 
-from b01_nuna_lora.data import format_prompt, load_records
+from b01_nuna_lora.data import load_records, record_to_messages
 
 
-def test_format_prompt_without_input():
-    text = format_prompt({"instruction": "Who are you?", "input": "", "output": "I'm B01."})
-    assert "### Instruction:\nWho are you?" in text
-    assert "### Response:\nI'm B01." in text
-    assert "### Input:" not in text
-
-
-def test_format_prompt_with_input():
-    text = format_prompt(
-        {"instruction": "Continue", "input": "user: hi", "output": "hello"}
+def test_record_to_messages_from_alpaca():
+    messages = record_to_messages(
+        {"instruction": "Who are you?", "input": "", "output": "I'm B01."}
     )
-    assert "### Input:\nuser: hi" in text
+    assert messages[0] == {"role": "user", "content": "Who are you?"}
+    assert messages[1]["role"] == "assistant"
+
+
+def test_load_identity_seed():
+    records = load_records(ROOT / "datasets/identity-seed.json")
+    assert len(records) >= 10
+    assert "messages" in records[0]
 
 
 def test_load_records_rejects_short_file(tmp_path: Path):

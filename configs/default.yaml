@@ -1,4 +1,5 @@
 base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+seed: 42
 epochs: 5
 batch_size: 2
 gradient_accumulation_steps: 4
@@ -15,5 +16,4 @@ target_modules:
   - v_proj
   - o_proj
 fp16: true
-# Transformers 5.x needs torch>=2.6 to resume optimizer state.
 fresh_start: true

@@ -1,27 +1,38 @@
 # Contributing
 
-This trainer is a small CUDA + PEFT CLI. Keep it that way.
+This repo is how the community helps **grow B01-NUna weights**. It is **not** the helloblue.ai app.
 
-## Scope
+Please read `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `datasets/README.md`.
 
-In:
+## You can contribute
 
-- Single-GPU LoRA on a documented Hugging Face causal LM
-- JSON instruction/input/output datasets
-- Optional Hub upload (private by default)
+- Licensed SFT JSON under `datasets/community/` (your original work or a stated license)
+- Eval probes with `any_must_match` / `must_not_match`
+- Trainer, docs, and CI fixes
+- Repro of eval failures with **synthetic** prompts
 
-Out:
+## You cannot contribute here
 
-- Next.js, chat collection, auto-train from user traffic
-- Dual-GPU, ROCm, Colossal AI
-- Merging this LoRA into Ollama `llama3.2:*` (architecture mismatch with TinyLlama)
+- Anything from **B01.beta**, Groq, or production logs
+- Personal data or live user conversations
+- Requests to “make this the default helloblue.ai model”
+- Full pretraining dumps or unlicensed scrapes
 
-## Setup
+## Dev setup
 
-Follow `README.md`. Run `python -m pytest tests/` (no GPU required for `tests/test_data.py`).
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+ruff check .
+pytest
+python -m b01_nuna_lora.train --dry-run
+python -m b01_nuna_lora.eval --check-only
+```
+
+GPU training is optional and local. Official Hub tags require a **generation** eval report.
 
 ## Pull requests
 
-- Do not commit `.env`, `outputs/`, `datasets/from-b01.json`, or adapter weights
-- Do not add live conversation logs
-- Keep claims accurate: this is R&D, not production NUna chat
+- One concern per PR
+- MIT unless maintainers agree otherwise
+- Do not commit `outputs/`, `.env`, or adapter weights

@@ -1,15 +1,18 @@
-"""Train a PEFT LoRA adapter on a single CUDA device."""
+"""TinyLlama LoRA via TRL SFTTrainer + tokenizer chat template."""
 
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
+import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from b01_nuna_lora.data import format_prompt, load_records
+from b01_nuna_lora.data import load_records
 
 
 def _load_config(path: Path) -> dict[str, Any]:
@@ -20,50 +23,73 @@ def _load_config(path: Path) -> dict[str, Any]:
     return data
 
 
+def _filter_kwargs(fn: Any, kwargs: dict[str, Any]) -> dict[str, Any]:
+    params = inspect.signature(fn).parameters
+    if any(p.kind == inspect.Parameter.VAR_KEYWORD for p in params.values()):
+        return kwargs
+    return {key: value for key, value in kwargs.items() if key in params}
+
+
+def _write_run_log(output: Path, payload: dict[str, Any]) -> None:
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "train_run.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Single-GPU TinyLlama LoRA trainer")
+    parser = argparse.ArgumentParser(
+        description="Single-GPU TinyLlama LoRA (TRL SFT). Not helloblue.ai production chat."
+    )
     parser.add_argument("--config", type=Path, default=Path("configs/default.yaml"))
-    parser.add_argument("--data", type=Path, required=True)
+    parser.add_argument("--data", type=Path, default=Path("datasets/train.json"))
     parser.add_argument("--output", type=Path, default=Path("outputs/adapter"))
-    parser.add_argument("--resume", type=Path, default=None, help="Checkpoint dir (needs torch>=2.6)")
+    parser.add_argument("--resume", type=Path, default=None)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate data and write train_run.json without CUDA",
+    )
     args = parser.parse_args(argv)
 
     cfg = _load_config(args.config)
     records = load_records(args.data)
-    args.output.mkdir(parents=True, exist_ok=True)
+    seed = int(cfg.get("seed", 42))
+    command = ["python", "-m", "b01_nuna_lora.train", *sys.argv[1:]]
+    run_log = {
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "command": command,
+        "config_path": str(args.config),
+        "data_path": str(args.data),
+        "n_examples": len(records),
+        "seed": seed,
+        "base_model": cfg.get("base_model"),
+        "dry_run": bool(args.dry_run),
+        "note": (
+            "Smoke/SFT scale only. Official helloblue.ai chat is Groq orchestration, not this adapter."
+        ),
+    }
+    _write_run_log(args.output, run_log)
+    print(json.dumps({k: run_log[k] for k in ("command", "n_examples", "seed", "base_model")}, indent=2))
+
+    if args.dry_run:
+        print(f"dry-run ok → {args.output / 'train_run.json'}")
+        return 0
 
     import torch
     from datasets import Dataset
-    from peft import LoraConfig, TaskType, get_peft_model
-    from transformers import (
-        AutoModelForCausalLM,
-        AutoTokenizer,
-        DataCollatorForLanguageModeling,
-        Trainer,
-        TrainerCallback,
-        TrainingArguments,
-    )
+    from peft import LoraConfig, TaskType
+    from transformers import AutoTokenizer, TrainerCallback
+    from trl import SFTConfig, SFTTrainer
 
     if not torch.cuda.is_available():
-        raise SystemExit("CUDA is required. CPU training is not supported in this CLI.")
+        raise SystemExit("CUDA is required for training. Use --dry-run without a GPU.")
 
-    device = torch.device("cuda:0")
-    base_model = str(cfg["base_model"])
-    print(f"Base model: {base_model}")
-    print(f"Examples: {len(records)}")
-    print(f"Device: {device}")
-
-    tokenizer = AutoTokenizer.from_pretrained(base_model)
+    tokenizer = AutoTokenizer.from_pretrained(str(cfg["base_model"]))
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    if not getattr(tokenizer, "chat_template", None):
+        raise SystemExit("Tokenizer has no chat_template; pick a chat base model.")
 
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model,
-        torch_dtype=torch.float16,
-        low_cpu_mem_usage=True,
-    )
-    model = model.to(device)
-
+    dataset = Dataset.from_list(records)
     lora = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=int(cfg["lora_rank"]),
@@ -72,79 +98,63 @@ def main(argv: list[str] | None = None) -> int:
         target_modules=list(cfg["target_modules"]),
         bias="none",
     )
-    model = get_peft_model(model, lora)
-    for name, param in model.named_parameters():
-        if "lora" in name.lower():
-            param.requires_grad = True
-    model.train()
-    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    if trainable == 0:
-        raise RuntimeError("LoRA produced no trainable parameters")
-    print(f"Trainable parameters: {trainable:,}")
 
-    dataset = Dataset.from_list(records).map(lambda ex: {"text": format_prompt(ex)})
-    max_length = int(cfg["max_length"])
-
-    def tokenize_function(examples: dict[str, Any]) -> dict[str, Any]:
-        tokenized = tokenizer(
-            examples["text"],
-            truncation=True,
-            max_length=max_length,
-            padding="max_length",
-        )
-        tokenized["labels"] = tokenized["input_ids"].copy()
-        return tokenized
-
-    tokenized = dataset.map(tokenize_function, batched=True, remove_columns=dataset.column_names)
-
-    training_args = TrainingArguments(
-        output_dir=str(args.output),
-        num_train_epochs=int(cfg["epochs"]),
-        per_device_train_batch_size=int(cfg["batch_size"]),
-        gradient_accumulation_steps=int(cfg["gradient_accumulation_steps"]),
-        learning_rate=float(cfg["learning_rate"]),
-        warmup_steps=int(cfg["warmup_steps"]),
-        logging_steps=10,
-        save_steps=int(cfg["save_steps"]),
-        eval_strategy="no",
-        fp16=bool(cfg.get("fp16", True)),
-        dataloader_pin_memory=False,
-        dataloader_num_workers=0,
-        report_to="none",
-        save_total_limit=3,
-        load_best_model_at_end=False,
-        remove_unused_columns=False,
-        optim="adamw_torch",
-        max_grad_norm=1.0,
-    )
+    sft_kwargs = {
+        "output_dir": str(args.output),
+        "num_train_epochs": int(cfg["epochs"]),
+        "per_device_train_batch_size": int(cfg["batch_size"]),
+        "gradient_accumulation_steps": int(cfg["gradient_accumulation_steps"]),
+        "learning_rate": float(cfg["learning_rate"]),
+        "warmup_steps": int(cfg["warmup_steps"]),
+        "logging_steps": 10,
+        "save_steps": int(cfg["save_steps"]),
+        "fp16": bool(cfg.get("fp16", True)),
+        "seed": seed,
+        "data_seed": seed,
+        "report_to": "none",
+        "save_total_limit": 3,
+        "max_length": int(cfg["max_length"]),
+        "max_seq_length": int(cfg["max_length"]),
+        "dataset_text_field": None,
+        "assistant_only_loss": True,
+        "packing": False,
+        "bf16": False,
+        "optim": "adamw_torch",
+        "max_grad_norm": 1.0,
+        "dataloader_pin_memory": False,
+        "dataloader_num_workers": 0,
+        "eval_strategy": "no",
+        "load_best_model_at_end": False,
+    }
 
     class ProgressCallback(TrainerCallback):
-        def on_log(self, args, state, control, logs=None, **kwargs):  # type: ignore[no-untyped-def]
+        def on_log(self, args, state, control, logs=None, **kwargs):  # noqa: A002
             if not logs:
                 return
-            payload = {
-                "epoch": state.epoch,
-                "step": state.global_step,
-                "loss": logs.get("loss", 0),
-                "learning_rate": logs.get("learning_rate", 0),
-            }
-            print(f"PROGRESS:{json.dumps(payload)}")
+            print(
+                "PROGRESS:"
+                + json.dumps(
+                    {
+                        "epoch": state.epoch,
+                        "step": state.global_step,
+                        "loss": logs.get("loss", 0),
+                        "learning_rate": logs.get("learning_rate", 0),
+                    }
+                )
+            )
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=tokenized,
-        data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
-        callbacks=[ProgressCallback()],
-    )
+    trainer_kwargs = {
+        "model": str(cfg["base_model"]),
+        "args": SFTConfig(**_filter_kwargs(SFTConfig, sft_kwargs)),
+        "train_dataset": dataset,
+        "peft_config": lora,
+        "processing_class": tokenizer,
+        "tokenizer": tokenizer,
+        "callbacks": [ProgressCallback()],
+    }
+    trainer = SFTTrainer(**_filter_kwargs(SFTTrainer, trainer_kwargs))
 
-    resume = args.resume
-    if cfg.get("fresh_start", True):
-        resume = None
-        print("fresh_start=true: not resuming checkpoints")
-    elif resume is None:
-        print("Starting without --resume")
-
+    resume = None if cfg.get("fresh_start", True) else args.resume
     if resume:
         trainer.train(resume_from_checkpoint=str(resume))
     else:

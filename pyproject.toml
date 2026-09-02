@@ -5,26 +5,34 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "b01-nuna-lora-trainer"
 version = "0.1.0"
-description = "Single-GPU PEFT LoRA trainer (TinyLlama). R&D only — not production NUna chat."
+description = "Public workshop for B01-NUna TinyLlama LoRA. Not helloblue.ai production chat."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "Helloblue Inc" }]
+keywords = ["lora", "peft", "trl", "tinylama", "sft"]
 dependencies = [
-  "transformers>=4.35.0",
-  "datasets>=2.14.0",
-  "accelerate>=0.24.0",
-  "peft>=0.6.0",
-  "safetensors>=0.4.0",
-  "huggingface_hub>=0.23.0",
-  "pyyaml>=6.0",
+  "transformers>=4.45.0,<5",
+  "datasets>=3.0.0,<4",
+  "accelerate>=1.0.0,<2",
+  "peft>=0.13.0,<0.16",
+  "trl>=0.14.0,<0.22",
+  "safetensors>=0.4.5,<0.6",
+  "huggingface_hub>=0.26.0,<1",
+  "pyyaml>=6.0.1,<7",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "ruff>=0.8"]
+
+[project.urls]
+Homepage = "https://github.com/HelloblueAI/b01-nuna-lora-trainer"
+Issues = "https://github.com/HelloblueAI/b01-nuna-lora-trainer/issues"
+Documentation = "https://github.com/HelloblueAI/b01-nuna-lora-trainer/blob/main/README.md"
 
 [project.scripts]
 b01-nuna-train = "b01_nuna_lora.train:main"
+b01-nuna-eval = "b01_nuna_lora.eval:main"
 b01-nuna-upload = "b01_nuna_lora.upload:main"
 
 [tool.setuptools.packages.find]
@@ -32,3 +40,10 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

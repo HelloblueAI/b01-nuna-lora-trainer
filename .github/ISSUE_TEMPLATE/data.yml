@@ -1,0 +1,18 @@
+---
+name: Data or eval probe
+description: Propose licensed SFT or a held-out probe
+labels: [data]
+body:
+  - type: textarea
+    id: license
+    attributes:
+      label: License of the data
+      description: Must be MIT-compatible original work or a named public license. No product logs.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this helps the model
+    validations:
+      required: true
