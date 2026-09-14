@@ -2,6 +2,8 @@
 
 Single-GPU PEFT LoRA SFT for [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) (chat templates, eval gate).
 
+**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Adding eval probes and licensed SFT data needs no GPU.
+
 ## Community
 
 - Data and evals: [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`datasets/community/`](./datasets/community/), [`GOVERNANCE.md`](./GOVERNANCE.md)
