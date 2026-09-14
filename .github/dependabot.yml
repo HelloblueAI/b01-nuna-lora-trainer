@@ -1,0 +1,32 @@
+version: 2
+
+updates:
+  # Dependency drift here is not cosmetic: this repo allows version ranges, and a TRL bump
+  # inside the existing range silently changed how loss was masked. tests/test_trl_contract.py
+  # fails CI when that happens, but only if something tells us a new release exists.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+    groups:
+      # These move as a set (TRL pins transformers, PEFT pins both), so a single PR gets
+      # them tested together instead of opening PRs that each fail on their own.
+      hf-stack:
+        patterns:
+          - "transformers"
+          - "trl"
+          - "peft"
+          - "accelerate"
+          - "datasets"
+          - "safetensors"
+          - "huggingface_hub"
+      dev-tooling:
+        patterns:
+          - "pytest*"
+          - "ruff"
