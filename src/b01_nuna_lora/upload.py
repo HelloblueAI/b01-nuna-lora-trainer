@@ -33,9 +33,6 @@ def main(argv: list[str] | None = None) -> int:
     if not args.repo:
         raise SystemExit("Pass --repo OWNER/NAME or set HF_REPO_ID")
 
-    if not args.allow_unverified_upload:
-        require_passing_report(args.eval_report)
-
     missing = [
         name
         for name in ("adapter_config.json", "adapter_model.safetensors")
@@ -43,6 +40,9 @@ def main(argv: list[str] | None = None) -> int:
     ]
     if missing:
         raise SystemExit(f"Adapter dir missing {missing}")
+
+    if not args.allow_unverified_upload:
+        require_passing_report(args.eval_report, adapter=args.adapter)
 
     from huggingface_hub import HfApi
 
