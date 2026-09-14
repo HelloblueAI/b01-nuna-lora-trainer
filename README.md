@@ -35,6 +35,8 @@ python -m b01_nuna_lora.train --dry-run
 python -m b01_nuna_lora.eval --check-only
 ```
 
+`--check-only` validates every probe without a GPU: unique non-empty `id`, a usable prompt, at least one matcher, and that each `any_must_match` / `must_not_match` pattern compiles as a regex. Bad probes fail in CI instead of crashing a GPU run mid-generation.
+
 ## Train (GPU)
 
 ```bash
@@ -44,7 +46,28 @@ python -m b01_nuna_lora.train \
   --output outputs/adapter
 ```
 
-Uses TRL `SFTTrainer` and the base tokenizer **chat template**. Writes `outputs/adapter/train_run.json` (command, seed, data path).
+Uses TRL `SFTTrainer` with **assistant-only loss**, so gradients come from assistant turns only.
+That requires a chat template containing `{% generation %}` / `{% endgeneration %}`, which stock
+TinyLlama does not have — with the stock template TRL raises `at least one example has no
+assistant tokens`. `configs/tinyllama_chat_template.jinja` is the stock template plus those
+markers; it renders byte-identically, so the prompt format is unchanged. `configs/default.yaml`
+points at it, and training preflights the mask before loading the model:
+
+```
+assistant-only loss active (44 supervised tokens in example 0)
+```
+
+Set `assistant_only_loss: false` to train on the full sequence instead.
+
+Writes
+`outputs/adapter/train_run.json` with a `status` of `started` → `completed`, so a crashed run is
+never mistaken for a finished one. A completed run also records duration, final train loss,
+resolved package versions, GPU name, data and adapter SHA-256, and any config kwargs the installed
+TRL did not accept.
+
+That last field matters: `pyproject` allows a wide TRL range, and kwargs TRL does not recognise are
+dropped. Losing `assistant_only_loss` means loss is computed over prompt tokens too, so the run now
+warns instead of silently training differently.
 
 ## Eval gate (GPU) then upload (opt-in)
 
@@ -54,7 +77,18 @@ export HF_TOKEN=hf_...
 python -m b01_nuna_lora.upload --adapter outputs/adapter --repo helloblueai/B01-NUna --private
 ```
 
+Eval scores every probe twice by default: once with the adapter, once with the same weights and
+the LoRA switched off (`--no-baseline` to skip). The report's `comparison` block names the probes
+that pass **because of** the adapter, the ones the base model already passed, and any the adapter
+made worse. If no probe is in the first group, the run warns that these probes cannot tell the
+LoRA apart from stock TinyLlama.
+
+Probes are `required` (gate the upload) or advisory. The `generalization` probes ship advisory,
+so they report signal without blocking a maintainer's tag until they are confirmed on a real run.
+
 `--private` is default. Public Hub tags are maintainer-only after generation eval. `--allow-unverified-upload` skips the gate and must not be used for public tags.
+
+The gate is bound to the adapter it evaluated. `eval` records a SHA-256 of `adapter_config.json` + `adapter_model.safetensors` in the report's `provenance`, and `upload` re-hashes `--adapter` and refuses to proceed unless they match. A stale report, or a report from a different or retrained adapter, fails the upload.
 
 ## Dataset
 

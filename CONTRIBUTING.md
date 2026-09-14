@@ -7,7 +7,12 @@ Please read `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `datasets/README.md`.
 ## You can contribute
 
 - Licensed SFT JSON under `datasets/community/` (your original work or a stated license)
-- Eval probes with `any_must_match` / `must_not_match`
+- Eval probes with `any_must_match` / `must_not_match` (patterns are regex first, falling back to
+  normalized substring; run `python -m b01_nuna_lora.eval --check-only --probes <file>` before you
+  open the PR, since CI rejects patterns that do not compile). See the schema in
+  `datasets/README.md`. **`generalization` probes are the most useful contribution** — probes that
+  only paraphrase a training row mostly prove the model memorized it. Open new probes with
+  `"required": false` so maintainers can verify them on a GPU before they gate uploads.
 - Trainer, docs, and CI fixes
 - Repro of eval failures with **synthetic** prompts
 

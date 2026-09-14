@@ -30,6 +30,27 @@ size_categories:
 | `eval_probes.json` | Held-out prompts + matchers (not training targets) |
 | `community/` | Third-party PRs (see that README) |
 
+## Probe schema
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Unique, non-empty |
+| `prompt` or `messages` | What gets sent to the model |
+| `any_must_match` | Passes if **any** pattern matches |
+| `must_not_match` | Fails if **any** pattern matches |
+| `category` | `memorization` or `generalization` (free-form; summarised per category) |
+| `required` | `true` gates the upload, `false` is advisory only (default `true`) |
+| `note` | Why the probe exists |
+
+Patterns are tried as regex first, then as a normalized substring. `--check-only` rejects patterns
+that do not compile, so write `\\b4\\b` rather than `4` when you mean the whole number.
+
+`memorization` probes paraphrase a training row, so a fine-tuned model is expected to pass them.
+They confirm the run did not break, but they do **not** show the adapter generalizes — several
+pass on stock TinyLlama, which is why eval runs a base-model control. `generalization` probes
+deliberately sit outside the training distribution (an unseen capital, an unseen harm category,
+over-refusal, format adherence) and ship advisory until verified on a real GPU run.
+
 ## Format
 
 Preferred:

@@ -54,7 +54,9 @@ See the GitHub workshop: [HelloblueAI/b01-nuna-lora-trainer](https://github.com/
 
 ## Evaluation
 
-Held-out probes in `datasets/eval_probes.json` (identity, simple facts, safety). Upload to Hub requires a **generation** eval report (`mode=generation`), not `--check-only`.
+Probes in `datasets/eval_probes.json` (identity, simple facts, safety). Upload to Hub requires a **generation** eval report (`mode=generation`), not `--check-only`, and the report is bound to the adapter by SHA-256 — a report from a different or retrained adapter is rejected.
+
+Eval also scores every probe against the base model with the LoRA disabled. Treat the `comparison` block of a report as the honest summary: the required probes paraphrase training rows, so several of them pass on stock TinyLlama and only the `gained` list reflects what this adapter changed.
 
 ## Maintainers
 
