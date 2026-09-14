@@ -2,6 +2,10 @@
 
 Single-GPU PEFT LoRA SFT for [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) (chat templates, eval gate).
 
+Measured results from real runs on an RTX 4060 — including a case where the gate
+caught the fine-tune destroying a capability the base model had — are in
+[`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
+
 ## Community
 
 - Data and evals: [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`datasets/community/`](./datasets/community/), [`GOVERNANCE.md`](./GOVERNANCE.md)

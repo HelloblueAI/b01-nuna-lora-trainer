@@ -34,6 +34,11 @@ def main(argv: list[str] | None = None) -> int:
         default=True,
         help="Also score the base model with the adapter disabled, as a control",
     )
+    parser.add_argument(
+        "--fail-on-regression",
+        action="store_true",
+        help="Exit non-zero if the adapter fails any probe the base model passed",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -104,10 +109,12 @@ def main(argv: list[str] | None = None) -> int:
             add_generation_prompt=True,
             return_tensors="pt",
         )
-        input_ids = encoded.to(model.device)
+        # transformers <5 hands back a tensor here; >=5 hands back a BatchEncoding.
+        input_ids = encoded if torch.is_tensor(encoded) else encoded["input_ids"]
+        input_ids = input_ids.to(model.device)
         with torch.no_grad():
             out = model.generate(
-                input_ids,
+                input_ids=input_ids,
                 max_new_tokens=args.max_new_tokens,
                 do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
@@ -166,6 +173,16 @@ def main(argv: list[str] | None = None) -> int:
                 "WARNING: no probe passes because of the adapter. "
                 "These probes cannot distinguish the LoRA from the base model."
             )
+
+        # A regression is a capability the base model had and the fine-tune
+        # destroyed. Required-probe counts hide it completely, so it has to be
+        # its own failure condition or an overfit adapter ships looking green.
+        if args.fail_on_regression and comparison["regressed"]:
+            print(
+                f"\nFAIL: {len(comparison['regressed'])} probe(s) regressed against the base "
+                "model. The fine-tune lost capability the base model already had."
+            )
+            return 1
 
     return 0 if summary["ok"] else 1
 
