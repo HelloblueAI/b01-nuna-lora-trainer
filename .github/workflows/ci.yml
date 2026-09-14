@@ -5,9 +5,16 @@ on:
     branches: [main]
   pull_request:
 
+# CI only reads the repo: lint, test, and CPU-only dry runs. Declared here rather than
+# relying on the repository default so the token stays read-only if that default changes.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
