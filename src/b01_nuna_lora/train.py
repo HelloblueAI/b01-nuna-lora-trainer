@@ -113,6 +113,30 @@ def _try_fingerprint(adapter: Path) -> str | None:
         return None
 
 
+def _vram_stats(torch: Any) -> dict[str, float | None]:
+    """Peak VRAM for the run, in MiB.
+
+    Reported because it is the number that decides whether a recipe fits a given
+    card. Reserved rather than allocated is the one that has to fit: it is what
+    the caching allocator held from the driver.
+    """
+    try:
+        return {
+            "peak_vram_mib": round(torch.cuda.max_memory_allocated() / 2**20, 1),
+            "peak_vram_reserved_mib": round(torch.cuda.max_memory_reserved() / 2**20, 1),
+            "total_vram_mib": round(
+                torch.cuda.get_device_properties(0).total_memory / 2**20, 1
+            ),
+        }
+    except Exception:
+        # A finished run's log must survive an allocator API that moved.
+        return {
+            "peak_vram_mib": None,
+            "peak_vram_reserved_mib": None,
+            "total_vram_mib": None,
+        }
+
+
 def _write_run_log(output: Path, payload: dict[str, Any]) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "train_run.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -273,6 +297,9 @@ def main(argv: list[str] | None = None) -> int:
     _write_run_log(args.output, run_log)
 
     resume = None if cfg.get("fresh_start", True) else args.resume
+    # Peak VRAM is the number that decides whether this recipe fits a given card,
+    # so measure it rather than leaving contributors to guess from the model size.
+    torch.cuda.reset_peak_memory_stats()
     started = time.monotonic()
     if resume:
         result = trainer.train(resume_from_checkpoint=str(resume))
@@ -282,18 +309,26 @@ def main(argv: list[str] | None = None) -> int:
     trainer.save_model()
     tokenizer.save_pretrained(args.output)
 
+    duration = round(time.monotonic() - started, 2)
+    metrics = getattr(result, "metrics", None) or {}
     run_log.update(
         {
             "status": "completed",
             "completed_at": datetime.now(timezone.utc).isoformat(),
-            "duration_seconds": round(time.monotonic() - started, 2),
+            "duration_seconds": duration,
             "final_train_loss": getattr(result, "training_loss", None),
             "global_step": getattr(result, "global_step", None),
             "adapter_sha256": _try_fingerprint(args.output),
+            "train_samples_per_second": metrics.get("train_samples_per_second"),
+            **_vram_stats(torch),
         }
     )
     _write_run_log(args.output, run_log)
-    print(f"Saved adapter to {args.output} (loss {run_log['final_train_loss']})")
+    print(
+        f"Saved adapter to {args.output} (loss {run_log['final_train_loss']}, "
+        f"peak VRAM {run_log['peak_vram_reserved_mib']} MiB / "
+        f"{run_log['total_vram_mib']} MiB, {duration}s)"
+    )
     return 0
 
 

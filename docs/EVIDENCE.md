@@ -34,6 +34,31 @@ changed *because* of these measurements.
 
 Base model alone scores 5/13 in both runs; it is the same frozen model.
 
+## Cost on an 8 GB card
+
+Measured by `train.py` and recorded in `train_run.json` for every run:
+
+| | value |
+|---|---|
+| peak VRAM (reserved) | 4,764 MiB of 7,783 MiB — **61% of the card** |
+| peak VRAM (allocated) | 4,642 MiB |
+| throughput | 15.2 samples/sec |
+| wall clock | 59.7 s for 120 steps (30 examples, 30 epochs) |
+
+Reserved is the figure that has to fit: it is what the caching allocator held
+from the driver. The default recipe therefore has roughly 3 GB of headroom on an
+8 GB card, which is where `max_length`, `batch_size` and rank can be spent.
+
+### Reproducibility, honestly
+
+Three runs at the same seed (42) and the same config produced final losses of
+0.3272, 0.3304 and 0.3362. Seeds pin data order and initialization, but cuDNN
+kernel selection and fp16 reduction order are not bit-deterministic. Peak VRAM,
+by contrast, was identical to the tenth of a MiB across runs.
+
+So: treat run-to-run loss differences of ~1% as noise. Probe outcomes, not loss,
+are the thing to compare between adapters.
+
 ### v1: the gate correctly rejected a broken adapter
 
 Twenty optimizer steps did not instill identity. The adapter learned the *shape*
