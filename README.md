@@ -6,6 +6,8 @@ Measured results from real runs on an RTX 4060 — including a case where the ga
 caught the fine-tune destroying a capability the base model had — are in
 [`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
 
+**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Adding eval probes and licensed SFT data needs no GPU.
+
 ## Community
 
 - Data and evals: [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`datasets/community/`](./datasets/community/), [`GOVERNANCE.md`](./GOVERNANCE.md)
