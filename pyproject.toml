@@ -18,7 +18,7 @@ dependencies = [
   "peft>=0.13.0,<0.21",
   "trl>=0.17.0,<1.14",
   "safetensors>=0.4.5,<0.9",
-  "huggingface_hub>=0.26.0,<1",
+  "huggingface_hub>=0.26.0,<2",
   "pyyaml>=6.0.1,<7",
 ]
 
