@@ -4,20 +4,30 @@ base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
 chat_template: configs/tinyllama_chat_template.jinja
 assistant_only_loss: true
 seed: 42
-epochs: 5
+
+# Measured, not guessed: 5 epochs at rank 8 over attention only is 20 optimizer
+# steps on a 30-example corpus, which left identity unlearned and the jailbreak
+# probe answering "I'm ChatGPT" (2/6 required probes). See docs/EVIDENCE.md.
+epochs: 30
 batch_size: 2
 gradient_accumulation_steps: 4
-learning_rate: 3.0e-4
+learning_rate: 2.0e-4
 max_length: 512
 warmup_steps: 10
-save_steps: 50
-lora_rank: 8
-lora_alpha: 16
-lora_dropout: 0.1
+save_steps: 200
+
+# Rank 16 over attention *and* MLP. Persona is carried by the MLP projections;
+# attention-only rank 8 had too little capacity to hold it.
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
 target_modules:
   - q_proj
   - k_proj
   - v_proj
   - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
 fp16: true
 fresh_start: true

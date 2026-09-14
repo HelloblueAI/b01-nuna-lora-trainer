@@ -10,6 +10,11 @@ build/
 !.env.example
 outputs/
 *.safetensors
+.venv-gpu/
+# Not committed. Besides the weights, eval reports embed raw completions, and the
+# base model's unsafe-probe answers include attempted harmful text. The measured
+# numbers live in docs/EVIDENCE.md instead.
+artifacts/
 datasets/from-b01.json
 datasets/live-*.json
 .DS_Store

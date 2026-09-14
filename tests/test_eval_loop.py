@@ -32,8 +32,13 @@ PROBES = [
 ]
 
 
-class FakeEncoded:
-    shape = (1, 0)
+class FakeBatchEncoding(dict):
+    """What transformers>=5 returns from apply_chat_template(return_tensors="pt").
+
+    Deliberately not a tensor: an earlier stub returned a tensor-shaped object,
+    so the loop passing this straight into generate() type-checked in tests and
+    crashed against the real library.
+    """
 
     def to(self, _device):
         return self
@@ -48,7 +53,7 @@ class FakeTokenizer:
 
     def apply_chat_template(self, messages, **_kwargs):
         self.last_prompt = messages[-1]["content"]
-        return FakeEncoded()
+        return FakeBatchEncoding(input_ids=torch.zeros((1, 0), dtype=torch.long))
 
     def decode(self, ids, **_kwargs):
         return "".join(ids)
@@ -66,7 +71,10 @@ class FakeModel:
     def eval(self):
         return self
 
-    def generate(self, _input_ids, **_kwargs):
+    def generate(self, input_ids=None, **_kwargs):
+        # Keyword-only, like transformers. Asserting the type here is what keeps
+        # a BatchEncoding from reaching the real generate() again.
+        assert torch.is_tensor(input_ids), f"generate() needs a tensor, got {type(input_ids)}"
         return [[self.scripted[(self.tokenizer.last_prompt, self.adapter_on)]]]
 
     @contextmanager
@@ -100,7 +108,7 @@ def _install_stubs(monkeypatch, scripted):
 
 def _adapter(tmp_path: Path) -> Path:
     directory = tmp_path / "adapter"
-    directory.mkdir()
+    directory.mkdir(exist_ok=True)
     (directory / "adapter_config.json").write_text('{"r": 8}')
     (directory / "adapter_model.safetensors").write_bytes(b"w")
     return directory
@@ -180,6 +188,61 @@ def test_regression_against_base_is_surfaced(tmp_path, monkeypatch, capsys):
     # A regression must not be reported as "the adapter did nothing": identity still improved.
     assert "adapter accounts for: ['identity']" in out
     assert "no probe passes because of the adapter" not in out
+
+
+REGRESSING = {
+    ("Who are you?", True): "I am B01.",
+    ("Who are you?", False): "I am a language model.",
+    ("Capital of France?", True): "London.",
+    ("Capital of France?", False): "Paris.",
+}
+
+
+def test_regression_alone_does_not_fail_the_run_by_default(tmp_path, monkeypatch):
+    """Opt-in: the default gate still scores required probes only."""
+    code, report, _ = _run(tmp_path, monkeypatch, REGRESSING)
+    assert report["comparison"]["regressed"] == ["capital"]
+    assert code == 1  # here because 'capital' is required and failed, not because it regressed
+
+
+def test_fail_on_regression_blocks_an_otherwise_passing_adapter(tmp_path, monkeypatch, capsys):
+    """The real-hardware case: every required probe passes while a capability was lost."""
+    scripted = {
+        ("Who are you?", True): "I am B01.",
+        ("Who are you?", False): "I am a language model.",
+        # Advisory probe: passes for the base, broken by the adapter.
+        ("Capital of France?", True): "Paris.",
+        ("Capital of France?", False): "Paris.",
+    }
+    probes = [
+        dict(PROBES[0], required=True),
+        dict(PROBES[1], required=False),
+    ]
+    path = tmp_path / "probes.json"
+    path.write_text(json.dumps(probes))
+
+    model = _install_stubs(monkeypatch, scripted)
+    assert model is not None
+    report = tmp_path / "r.json"
+    code = eval_main(
+        ["--adapter", str(_adapter(tmp_path)), "--probes", str(path),
+         "--report", str(report), "--fail-on-regression"]
+    )
+    # No regression in this script, so the flag must not fire.
+    assert code == 0
+
+    # Now regress the advisory probe and re-run with the same flag.
+    model2 = _install_stubs(monkeypatch, {**scripted, ("Capital of France?", True): "London."})
+    assert model2 is not None
+    report2 = tmp_path / "r2.json"
+    code2 = eval_main(
+        ["--adapter", str(_adapter(tmp_path)), "--probes", str(path),
+         "--report", str(report2), "--fail-on-regression"]
+    )
+    body = json.loads(report2.read_text())
+    assert body["summary"]["ok"] is True, "all required probes still pass"
+    assert code2 == 1, "but the run fails because the adapter lost a capability"
+    assert "lost capability the base model already had" in capsys.readouterr().out
 
 
 def test_failing_required_probe_returns_nonzero(tmp_path, monkeypatch):

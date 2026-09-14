@@ -32,3 +32,8 @@ jobs:
         run: |
           python -m b01_nuna_lora.train --dry-run --output outputs/ci-dry
           python -m b01_nuna_lora.eval --check-only --report outputs/ci-eval.json
+      - name: Train/eval contamination
+        # Reports overlap rather than failing: 3 required probes are known to be
+        # recall today (docs/EVIDENCE.md). This keeps the number visible in CI so
+        # a new probe that copies a training row is noticed in review.
+        run: python -m b01_nuna_lora.contamination --report outputs/ci-contamination.json
