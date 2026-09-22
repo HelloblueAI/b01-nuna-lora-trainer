@@ -2,7 +2,7 @@
 transformers>=4.45.0,<6
 datasets>=3.0.0,<6
 accelerate>=1.0.0,<2
-peft>=0.13.0,<0.21
+peft>=0.13.0,<0.22
 trl>=0.17.0,<1.14  # assistant_only_loss landed in 0.17
 safetensors>=0.4.5,<0.9
 huggingface_hub>=0.26.0,<2
