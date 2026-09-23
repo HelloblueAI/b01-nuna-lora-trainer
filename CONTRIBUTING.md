@@ -18,9 +18,9 @@ Please read `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `datasets/README.md`.
 
 ## You cannot contribute here
 
-- Anything from **B01.beta**, Groq, or production logs
+- Anything from production systems, private models, or production logs
 - Personal data or live user conversations
-- Requests to “make this the default helloblue.ai model”
+- Requests to “make this a production model”
 - Full pretraining dumps or unlicensed scrapes
 
 ## Dev setup

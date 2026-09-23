@@ -2,7 +2,8 @@
 
 ## Product vs this repo
 
-helloblue.ai, Groq keys, and `B01.beta` are **out of scope** for this repository. Do not send product secrets or user data here.
+Production systems, production credentials, private models, and user data are
+**out of scope** for this repository. Do not send product secrets or user data here.
 
 ## Report a vulnerability in this trainer
 

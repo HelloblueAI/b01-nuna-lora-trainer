@@ -7,7 +7,7 @@ body:
     id: what
     attributes:
       label: What happened
-      description: Do not paste helloblue.ai secrets, Groq keys, or user chats.
+      description: Do not paste production credentials, provider API keys, or user chats.
     validations:
       required: true
   - type: textarea
