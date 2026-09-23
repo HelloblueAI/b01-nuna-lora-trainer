@@ -1,0 +1,34 @@
+# Same recipe as configs/default.yaml, with the base frozen in 4-bit NF4.
+# On TinyLlama the VRAM saving is modest. The point of this file is the loading
+# path: a 3B–8B base does not fit this card in fp16, and it does in 4-bit.
+# Training switches to bfloat16 automatically, because TRL stores QLoRA adapter
+# weights in bf16. Set gradient_checkpointing: true before moving to a 7B base.
+base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+chat_template: configs/tinyllama_chat_template.jinja
+assistant_only_loss: true
+seed: 42
+epochs: 30
+batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 2.0e-4
+max_length: 512
+warmup_steps: 10
+save_steps: 200
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+fp16: true
+fresh_start: true
+gradient_checkpointing: false
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_use_double_quant: true
+bnb_4bit_compute_dtype: bfloat16

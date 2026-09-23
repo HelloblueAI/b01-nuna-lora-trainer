@@ -42,6 +42,17 @@ def test_core_training_kwargs_still_exist(name):
 
 
 @requires_trl
+def test_sft_trainer_accepts_quantization_config():
+    """Losing this kwarg would make load_in_4bit a silent full-precision run."""
+    kept, dropped = _filter_kwargs(trl.SFTTrainer.__init__, {"quantization_config": None})
+    assert "quantization_config" in kept, (
+        f"installed trl {trl.__version__} dropped SFTTrainer.quantization_config; "
+        "4-bit training would be ignored"
+    )
+    assert dropped == []
+
+
+@requires_trl
 def test_assistant_only_loss_support_is_explicit():
     """Not a hard failure: older supported TRL lacks it, but the run must say so."""
     if _accepted("assistant_only_loss"):

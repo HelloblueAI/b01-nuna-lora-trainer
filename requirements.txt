@@ -7,3 +7,4 @@ trl>=0.17.0,<1.14  # assistant_only_loss landed in 0.17
 safetensors>=0.4.5,<0.9
 huggingface_hub>=0.26.0,<2
 pyyaml>=6.0.1,<7
+# 4-bit training (configs/qlora.yaml) is optional: pip install -e ".[qlora]"

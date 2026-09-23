@@ -14,6 +14,22 @@ from b01_nuna_lora.scoring import (
     score_completion,
     write_report,
 )
+from b01_nuna_lora.train import (
+    bitsandbytes_config_from_kwargs,
+    quantization_kwargs,
+    recorded_quantization,
+    require_bitsandbytes,
+)
+
+
+def resolve_quantization(adapter: Path, override: bool | None) -> dict | None:
+    """4-bit settings for eval: the flag wins, otherwise the adapter's train log."""
+    if override is False:
+        return None
+    recorded = recorded_quantization(adapter)
+    if override is True:
+        return recorded or quantization_kwargs({"load_in_4bit": True})
+    return recorded
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -38,6 +54,12 @@ def main(argv: list[str] | None = None) -> int:
         "--fail-on-regression",
         action="store_true",
         help="Exit non-zero if the adapter fails any probe the base model passed",
+    )
+    parser.add_argument(
+        "--load-in-4bit",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Load the base in 4-bit. Default follows the adapter's train_run.json",
     )
     args = parser.parse_args(argv)
 
@@ -91,14 +113,26 @@ def main(argv: list[str] | None = None) -> int:
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
+    quant = resolve_quantization(args.adapter, args.load_in_4bit)
+    provenance["load_in_4bit"] = quant is not None
+    if quant is not None:
+        require_bitsandbytes()
+        print(
+            "eval base in 4-bit "
+            f"{quant['bnb_4bit_quant_type']} (compute {quant['bnb_4bit_compute_dtype']})"
+        )
+    else:
+        print("eval base in fp16")
+
     tokenizer = AutoTokenizer.from_pretrained(str(args.adapter))
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    base = AutoModelForCausalLM.from_pretrained(
-        args.base_model,
-        torch_dtype=torch.float16,
-        device_map="auto",
-    )
+    load_kwargs: dict = {"device_map": "auto"}
+    if quant is not None:
+        load_kwargs["quantization_config"] = bitsandbytes_config_from_kwargs(quant)
+    else:
+        load_kwargs["torch_dtype"] = torch.float16
+    base = AutoModelForCausalLM.from_pretrained(args.base_model, **load_kwargs)
     model = PeftModel.from_pretrained(base, str(args.adapter))
     model.eval()
 

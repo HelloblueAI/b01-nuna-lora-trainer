@@ -26,6 +26,7 @@ updates:
           - "datasets"
           - "safetensors"
           - "huggingface_hub"
+          - "bitsandbytes"
       dev-tooling:
         patterns:
           - "pytest*"

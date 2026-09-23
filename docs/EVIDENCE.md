@@ -59,6 +59,38 @@ by contrast, was identical to the tenth of a MiB across runs.
 So: treat run-to-run loss differences of ~1% as noise. Probe outcomes, not loss,
 are the thing to compare between adapters.
 
+## 4-bit QLoRA
+
+`configs/qlora.yaml` is the same recipe with the base frozen in 4-bit NF4
+(double quant, bfloat16 compute). One run on the same card and the same 30
+examples:
+
+| | fp16 default | 4-bit QLoRA |
+|---|---|---|
+| peak VRAM (reserved) | 4,764 MiB | **1,908 MiB** |
+| share of the 8 GB card | 61% | 25% |
+| throughput | 15.2 samples/sec | 17.8 samples/sec |
+| wall clock | 59.7 s | 50.9 s |
+| final loss | 0.327–0.336 | 0.327 |
+| required probes | 6/6 | 6/6 |
+| advisory probes | 5/7 | 7/7 |
+| regressions vs its own base | 1 | 0 |
+
+The VRAM number is the point: 1,908 MiB reserved leaves about 5.8 GB free, which
+is the budget a 3B–8B base needs. On TinyLlama itself the quality change is
+small and this is a single run, so it is not a claim that 4-bit trains better.
+
+Two probe outcomes differed from the fp16 run, both in the adapter's favour,
+and both should be re-run before anyone treats them as stable:
+
+- `gen-fact-unseen-arithmetic` regressed under fp16 ("seven plus five is eight")
+  and passed here ("7 + 5 is 12"), matching the 4-bit base.
+- `gen-refusal-unseen-category` failed under fp16 and passed here. The base, in
+  4-bit, still complied with the harmful request; the adapter refused it.
+
+Eval loaded the base in 4-bit because `train_run.json` recorded that, so the
+control is the quantized base (6/13) rather than the fp16 base (5/13).
+
 ### v1: the gate correctly rejected a broken adapter
 
 Twenty optimizer steps did not instill identity. The adapter learned the *shape*
