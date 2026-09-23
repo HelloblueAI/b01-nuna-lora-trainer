@@ -1,9 +1,9 @@
 ## Summary
 
-<!-- Trainer / data / eval only. Not helloblue.ai product changes. -->
+<!-- Trainer / data / eval only. Not production product changes. -->
 
 ## Checklist
 
-- [ ] No user chats, secrets, or `B01.beta` code
+- [ ] No user chats, credentials, or production code
 - [ ] Data is licensed (MIT or stated)
 - [ ] `pytest` and `ruff check .` pass locally (or CI will)

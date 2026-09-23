@@ -15,7 +15,7 @@ pipeline_tag: text-generation
 
 # B01-NUna LoRA (workshop artifact)
 
-**This is not helloblue.ai production chat.** The product at [helloblue.ai](https://helloblue.ai) uses **Groq** and closed orchestration. This card describes a **PEFT LoRA on TinyLlama 1.1B** for research, identity smoke tests, and community SFT.
+**This research artifact is separate from Helloblue's production AI systems.** This card describes a **PEFT LoRA on TinyLlama 1.1B** for research, identity smoke tests, and community SFT.
 
 ## Intended use
 
@@ -25,8 +25,8 @@ pipeline_tag: text-generation
 
 ## Out of scope
 
-- Matching Llama 4, DeepSeek, Kimi, or Groq 70B quality
-- Serving as the default NUna for helloblue.ai
+- Matching Llama 4, DeepSeek, Kimi, or other frontier-class quality
+- Serving as a production assistant
 - Training on product user logs
 - Merging this adapter onto Ollama `llama3.2:*` (architecture mismatch)
 
@@ -48,8 +48,8 @@ model = PeftModel.from_pretrained(base, ADAPTER)
 
 See the GitHub workshop: [HelloblueAI/b01-nuna-lora-trainer](https://github.com/HelloblueAI/b01-nuna-lora-trainer).
 
-- Method: TRL `SFTTrainer` + tokenizer `chat_template`
-- LoRA: r=8, alpha=16, dropout=0.1, `q/k/v/o_proj`
+- Method: TRL `SFTTrainer` + patched `chat_template` with `{% generation %}` markers (assistant-only loss)
+- LoRA: r=16, alpha=32, dropout=0.05, `q/k/v/o_proj` + `gate/up/down_proj`
 - Data: Helloblue-authored smoke SFT (MIT), not a web scrape
 
 ## Evaluation

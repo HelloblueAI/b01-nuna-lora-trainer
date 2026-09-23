@@ -1,6 +1,6 @@
 # Governance
 
-**Product** (helloblue.ai, Groq, `B01.beta`) is **not** governed here and is not open for contribution.
+**Production systems and private models** are **not** governed here and are not open for contribution.
 
 **This repository** is the public workshop for **B01-NUna weights** (TinyLlama LoRA / future licensed bases).
 
