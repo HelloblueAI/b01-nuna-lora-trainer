@@ -113,6 +113,102 @@ def _try_fingerprint(adapter: Path) -> str | None:
         return None
 
 
+def quantization_kwargs(cfg: dict[str, Any]) -> dict[str, Any] | None:
+    """BitsAndBytesConfig kwargs for QLoRA, or None when 4-bit is off.
+
+    Separated from model loading so the config surface is covered without a GPU.
+    nf4 + double quant is the standard QLoRA setup; compute dtype stays fp16 to
+    match the rest of the recipe on consumer cards without bf16.
+    """
+    if not cfg.get("load_in_4bit"):
+        return None
+
+    quant_type = str(cfg.get("bnb_4bit_quant_type", "nf4"))
+    if quant_type not in ("nf4", "fp4"):
+        raise SystemExit(f"bnb_4bit_quant_type must be 'nf4' or 'fp4', got {quant_type!r}")
+
+    compute_dtype = str(cfg.get("bnb_4bit_compute_dtype", "float16"))
+    if compute_dtype not in ("float16", "bfloat16", "float32"):
+        raise SystemExit(
+            "bnb_4bit_compute_dtype must be float16, bfloat16 or float32, "
+            f"got {compute_dtype!r}"
+        )
+
+    return {
+        "load_in_4bit": True,
+        "bnb_4bit_quant_type": quant_type,
+        "bnb_4bit_use_double_quant": bool(cfg.get("bnb_4bit_use_double_quant", True)),
+        "bnb_4bit_compute_dtype": compute_dtype,
+    }
+
+
+def apply_4bit_training_precision(
+    sft_kwargs: dict[str, Any], quant: dict[str, Any] | None, *, bf16_supported: bool
+) -> str:
+    """Match the trainer dtype to how TRL stores QLoRA adapter weights.
+
+    Installed TRL casts trainable QLoRA params to bfloat16. Leaving fp16 on would
+    train those weights under the wrong autocast. Returns the precision name
+    recorded in the run log.
+    """
+    if quant is None:
+        return "bf16" if sft_kwargs.get("bf16") else "fp16"
+    if not bf16_supported:
+        raise SystemExit(
+            "load_in_4bit needs a GPU with bfloat16. This TRL casts QLoRA adapter "
+            "weights to bf16, so fp16 training would not match them."
+        )
+    sft_kwargs["fp16"] = False
+    sft_kwargs["bf16"] = True
+    quant["bnb_4bit_compute_dtype"] = "bfloat16"
+    return "bf16"
+
+
+def require_trainer_accepts_quantization(dropped: list[str], *, enabled: bool) -> None:
+    """4-bit that the installed TRL ignores would silently train in full precision."""
+    if enabled and "quantization_config" in dropped:
+        raise SystemExit(
+            "load_in_4bit is set, but the installed TRL does not accept "
+            "quantization_config on SFTTrainer. Training would silently stay in "
+            "full precision. Upgrade TRL, or set load_in_4bit: false."
+        )
+
+
+def require_bitsandbytes() -> None:
+    try:
+        import bitsandbytes  # noqa: F401
+    except ImportError as exc:
+        raise SystemExit(
+            "load_in_4bit needs bitsandbytes. Install the extra: pip install -e '.[qlora]'"
+        ) from exc
+
+
+def bitsandbytes_config_from_kwargs(quant: dict[str, Any]) -> Any:
+    import torch
+    from transformers import BitsAndBytesConfig
+
+    return BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type=quant["bnb_4bit_quant_type"],
+        bnb_4bit_use_double_quant=bool(quant["bnb_4bit_use_double_quant"]),
+        bnb_4bit_compute_dtype=getattr(torch, quant["bnb_4bit_compute_dtype"]),
+    )
+
+
+def recorded_quantization(adapter: str | Path) -> dict[str, Any] | None:
+    """Quantization settings from the adapter's train_run.json, if it was 4-bit."""
+    path = Path(adapter) / "train_run.json"
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    quant = payload.get("quantization")
+    if isinstance(quant, dict) and quant.get("load_in_4bit"):
+        return quant
+    if payload.get("load_in_4bit"):
+        return quantization_kwargs({"load_in_4bit": True})
+    return None
+
+
 def _vram_stats(torch: Any) -> dict[str, float | None]:
     """Peak VRAM for the run, in MiB.
 
@@ -158,6 +254,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     cfg = _load_config(args.config)
+    # Reject a bad 4-bit config before the dry-run return, so CI catches it.
+    quantization_kwargs(cfg)
     records = load_records(args.data)
     seed = int(cfg.get("seed", 42))
     command = ["python", "-m", "b01_nuna_lora.train", *sys.argv[1:]]
@@ -252,7 +350,24 @@ def main(argv: list[str] | None = None) -> int:
         "dataloader_num_workers": 0,
         "eval_strategy": "no",
         "load_best_model_at_end": False,
+        "gradient_checkpointing": bool(cfg.get("gradient_checkpointing", False)),
     }
+
+    quant = quantization_kwargs(cfg)
+    precision = apply_4bit_training_precision(
+        sft_kwargs, quant, bf16_supported=torch.cuda.is_bf16_supported()
+    )
+    run_log["load_in_4bit"] = quant is not None
+    run_log["quantization"] = quant
+    run_log["train_precision"] = precision
+    if quant is not None:
+        require_bitsandbytes()
+        print(
+            "4-bit QLoRA: "
+            f"{quant['bnb_4bit_quant_type']}, "
+            f"double_quant={quant['bnb_4bit_use_double_quant']}, "
+            f"compute={quant['bnb_4bit_compute_dtype']}"
+        )
 
     class ProgressCallback(TrainerCallback):
         def on_log(self, args, state, control, logs=None, **kwargs):  # noqa: A002
@@ -288,7 +403,10 @@ def main(argv: list[str] | None = None) -> int:
         "tokenizer": tokenizer,
         "callbacks": [ProgressCallback()],
     }
+    if quant is not None:
+        trainer_kwargs["quantization_config"] = bitsandbytes_config_from_kwargs(quant)
     trainer_init_kwargs, dropped_trainer = _filter_kwargs(SFTTrainer, trainer_kwargs)
+    require_trainer_accepts_quantization(dropped_trainer, enabled=quant is not None)
     trainer = SFTTrainer(**trainer_init_kwargs)
 
     run_log["dropped_sft_config_kwargs"] = dropped_sft

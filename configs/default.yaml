@@ -31,3 +31,7 @@ target_modules:
   - down_proj
 fp16: true
 fresh_start: true
+
+# 4-bit QLoRA stays off here so the measured fp16 recipe remains the default.
+# configs/qlora.yaml turns it on; that is what fits a 3B–8B base on an 8GB card.
+load_in_4bit: false

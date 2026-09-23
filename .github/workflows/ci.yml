@@ -31,6 +31,7 @@ jobs:
       - name: Dry-run train + eval schema
         run: |
           python -m b01_nuna_lora.train --dry-run --output outputs/ci-dry
+          python -m b01_nuna_lora.train --dry-run --config configs/qlora.yaml --output outputs/ci-qlora
           python -m b01_nuna_lora.eval --check-only --report outputs/ci-eval.json
       - name: Train/eval contamination
         # Reports overlap rather than failing: 3 required probes are known to be

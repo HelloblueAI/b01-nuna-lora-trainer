@@ -52,6 +52,8 @@ python -m b01_nuna_lora.train \
   --output outputs/adapter
 ```
 
+4-bit QLoRA (same recipe, base weights in NF4) is `configs/qlora.yaml`. It needs the extra: `pip install -e ".[qlora]"`. On this 1.1B model the memory saving is small; the path is what lets a 3B–8B base fit an 8GB card. Eval follows the adapter's `train_run.json` and loads the base in 4-bit when that is how it was trained (`--no-load-in-4bit` overrides).
+
 Uses TRL `SFTTrainer` with **assistant-only loss**, so gradients come from assistant turns only.
 That requires a chat template containing `{% generation %}` / `{% endgeneration %}`, which stock
 TinyLlama does not have — with the stock template TRL raises `at least one example has no
