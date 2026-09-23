@@ -2,4 +2,4 @@ blank_issues_enabled: false
 contact_links:
   - name: helloblue.ai product
     url: https://helloblue.ai
-    about: Product chat and Groq orchestration are not this repo.
+    about: Production systems are separate from this research repo.
