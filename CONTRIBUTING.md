@@ -1,6 +1,6 @@
 # Contributing
 
-This repo is how the community helps **grow B01-NUna weights**. It is **not** the helloblue.ai app.
+This repo is how the community helps the **open-source workshop trainer**. It is **not** the production NUna system. That system is documented at [helloblue.ai/model-card](https://helloblue.ai/model-card), and contributions here do not change it.
 
 Please read `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `datasets/README.md`.
 
