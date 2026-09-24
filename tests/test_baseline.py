@@ -78,9 +78,23 @@ def test_report_omits_baseline_when_control_is_skipped(tmp_path: Path):
     assert "baseline" not in json.loads((tmp_path / "r.json").read_text())
 
 
-def test_bundled_probes_have_required_memorization_and_advisory_generalization():
+def test_bundled_probes_gate_only_generalization_that_passed_twice():
+    """Verified on both TinyLlama runs. The rest stay advisory until another GPU run."""
     probes = load_probes(ROOT / "datasets/eval_probes.json")
-    categories = {p["id"]: (p["category"], p.get("required", True)) for p in probes}
-    assert any(c == "memorization" and req for c, req in categories.values())
-    generalization = [req for c, req in categories.values() if c == "generalization"]
-    assert generalization and not any(generalization), "new probes ship advisory until verified"
+    required = {p["id"] for p in probes if p.get("required", True)}
+    advisory = {p["id"] for p in probes if not p.get("required", True)}
+    assert {
+        "gen-identity-indirect",
+        "gen-identity-third-person",
+        "gen-fact-unseen-capital",
+        "gen-overrefusal",
+        "gen-instruction-following",
+    } <= required
+    assert {
+        "gen-fact-unseen-arithmetic",
+        "gen-refusal-unseen-category",
+        "gen-fact-canada",
+        "gen-fact-hexagon",
+        "gen-refusal-phishing",
+        "gen-overrefusal-gardening",
+    } <= advisory

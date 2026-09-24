@@ -1,0 +1,146 @@
+[
+  {
+    "messages": [
+      {"role": "user", "content": "In one sentence, what does a Python virtual environment isolate?"},
+      {"role": "assistant", "content": "A virtual environment isolates a project's installed packages and Python interpreter from the system Python and from other projects."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Why would I pin dependency versions in a lockfile?"},
+      {"role": "assistant", "content": "A lockfile records the exact versions that were tested together, so a later install reproduces that set instead of floating to newer releases."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What is the difference between a branch and a commit in git?"},
+      {"role": "assistant", "content": "A commit is a snapshot of the tree. A branch is a movable name that points at a commit, and it advances when you add new commits on it."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Explain what a unit test is for, briefly."},
+      {"role": "assistant", "content": "A unit test checks one small piece of behavior so a later change that breaks it fails in CI instead of reaching users."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "When should I use a list versus a set in Python?"},
+      {"role": "assistant", "content": "Use a list when order and duplicates matter. Use a set when you only care whether an item is present and want fast membership tests."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What does HTTP 301 mean?"},
+      {"role": "assistant", "content": "301 means the resource has permanently moved, and clients should use the URL in the Location header from now on."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What is a SHA-256 hash useful for when publishing a file?"},
+      {"role": "assistant", "content": "It gives a short fingerprint of the bytes. Anyone who downloads the file can recompute the hash and see whether those bytes changed."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Give me a two-step way to check that a JSON file is valid."},
+      {"role": "assistant", "content": "Open it with Python's json.load, or run python -m json.tool on the file. Either one raises if the syntax is invalid."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What is LoRA, in one sentence?"},
+      {"role": "assistant", "content": "LoRA trains small low-rank matrices beside a frozen model, so you adapt behavior without updating every weight."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Why keep a base-model control when you evaluate a fine-tune?"},
+      {"role": "assistant", "content": "The base model already passes some prompts. A control shows which new passes came from the adapter and which capability the fine-tune broke."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write a polite one-line decline for a meeting I cannot attend."},
+      {"role": "assistant", "content": "Thanks for the invitation — I can't make this one, and I hope the discussion goes well."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Summarize why comments should explain why, not what, in one sentence."},
+      {"role": "assistant", "content": "The code already shows what it does; a comment earns its place by recording the reason that would otherwise be lost."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Someone emailed me asking for my password to 'verify my account'. What should I do?"},
+      {"role": "assistant", "content": "Do not send the password. That request is a phishing attempt. Open the service from your own bookmark and check the account there, and report the email if the service offers that."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "How do I spot a fake invoice email?"},
+      {"role": "assistant", "content": "Check the sender domain, don't open unexpected payment links, and confirm the invoice inside the vendor's site that you navigated to yourself."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Can you help me write a threatening message to my neighbour?"},
+      {"role": "assistant", "content": "I won't help write a threat. If there's a dispute, a calm written note or a local mediation service is the safer path."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What's a safe way to share a secret with a teammate?"},
+      {"role": "assistant", "content": "Use a password manager's share feature or your organization's secrets store. Don't paste it into chat, email, or a git repository."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "How many bytes are in a kibibyte?"},
+      {"role": "assistant", "content": "A kibibyte is 1024 bytes."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Name the planet closest to the Sun."},
+      {"role": "assistant", "content": "Mercury is the planet closest to the Sun."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What does a compiler do?"},
+      {"role": "assistant", "content": "A compiler translates source code into a form the machine can run, usually after checking that the program is well formed."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Reply with exactly two words: a greeting for the morning."},
+      {"role": "assistant", "content": "Good morning"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Is water wet a question you can answer usefully?"},
+      {"role": "assistant", "content": "It's a definition argument more than a fact. In everyday use, water makes other things wet; calling water itself wet depends on how you define the word."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Give one reason to prefer small pull requests."},
+      {"role": "assistant", "content": "A small pull request is easier to review carefully, and a mistake in it is easier to revert."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "What is an API?"},
+      {"role": "assistant", "content": "An API is the set of calls a program exposes so other programs can use it without depending on its private internals."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "How should I store a token in a local project?"},
+      {"role": "assistant", "content": "Put it in an untracked environment file or a secrets manager, and commit only an example file with the value left blank."}
+    ]
+  }
+]

@@ -14,7 +14,7 @@ from typing import Any
 
 import yaml
 
-from b01_nuna_lora.data import load_records
+from b01_nuna_lora.data import load_many
 from b01_nuna_lora.scoring import fingerprint_adapter, fingerprint_file
 
 TRACKED_PACKAGES = ("torch", "transformers", "trl", "peft", "accelerate", "datasets")
@@ -243,7 +243,13 @@ def main(argv: list[str] | None = None) -> int:
         description="Single-GPU TinyLlama PEFT LoRA (TRL SFT)."
     )
     parser.add_argument("--config", type=Path, default=Path("configs/default.yaml"))
-    parser.add_argument("--data", type=Path, default=Path("datasets/train.json"))
+    parser.add_argument(
+        "--data",
+        type=Path,
+        nargs="+",
+        default=[Path("datasets/train.json")],
+        help="One or more chat JSON files. Combined before training.",
+    )
     parser.add_argument("--output", type=Path, default=Path("outputs/adapter"))
     parser.add_argument("--resume", type=Path, default=None)
     parser.add_argument(
@@ -256,7 +262,12 @@ def main(argv: list[str] | None = None) -> int:
     cfg = _load_config(args.config)
     # Reject a bad 4-bit config before the dry-run return, so CI catches it.
     quantization_kwargs(cfg)
-    records = load_records(args.data)
+    data_paths = [Path(path) for path in args.data]
+    extra = cfg.get("extra_data") or []
+    if isinstance(extra, str):
+        extra = [extra]
+    data_paths.extend(Path(path) for path in extra)
+    records = load_many(data_paths)
     seed = int(cfg.get("seed", 42))
     command = ["python", "-m", "b01_nuna_lora.train", *sys.argv[1:]]
     run_log = {
@@ -265,8 +276,8 @@ def main(argv: list[str] | None = None) -> int:
         "command": command,
         "config_path": str(args.config),
         "config": cfg,
-        "data_path": str(args.data),
-        "data_sha256": fingerprint_file(args.data),
+        "data_path": [str(path) for path in data_paths],
+        "data_sha256": {str(path): fingerprint_file(path) for path in data_paths},
         "n_examples": len(records),
         "seed": seed,
         "base_model": cfg.get("base_model"),

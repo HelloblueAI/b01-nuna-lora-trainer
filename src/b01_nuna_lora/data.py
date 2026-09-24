@@ -50,6 +50,16 @@ def to_sft_row(record: dict[str, Any]) -> dict[str, Any]:
     return {"messages": record_to_messages(record)}
 
 
+def load_many(paths: list[str | Path], *, min_records: int = 10) -> list[dict[str, Any]]:
+    """Concatenate chat files. The minimum applies to the combined set, not each file."""
+    records: list[dict[str, Any]] = []
+    for path in paths:
+        records.extend(load_records(path, min_records=1))
+    if len(records) < min_records:
+        raise ValueError(f"Need at least {min_records} records, got {len(records)}")
+    return records
+
+
 def load_records(path: str | Path, *, min_records: int = 10) -> list[dict[str, Any]]:
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, list):
