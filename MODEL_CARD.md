@@ -15,7 +15,7 @@ pipeline_tag: text-generation
 
 # B01-NUna LoRA (workshop artifact)
 
-**This research artifact is separate from Helloblue's production AI systems.** This card describes a **PEFT LoRA on TinyLlama 1.1B** for research, identity smoke tests, and community SFT.
+**This research artifact is not the production NUna system.** Production NUna has its own model card at [helloblue.ai/model-card](https://helloblue.ai/model-card). This card describes a **PEFT LoRA workshop** for research, identity smoke tests, and community SFT. A Hub repo published from this trainer is still that workshop adapter.
 
 ## Intended use
 

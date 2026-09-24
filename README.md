@@ -1,6 +1,8 @@
 # b01-nuna-lora-trainer
 
-Single-GPU PEFT LoRA SFT for [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) (chat templates, eval gate).
+Open-source workshop for single-GPU PEFT LoRA SFT. **This is not the production NUna system.** Production NUna is described only at [helloblue.ai/model-card](https://helloblue.ai/model-card). Training, eval, and any Hub upload from this repo do not change that system.
+
+The default recipe fine-tunes [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) (chat templates, eval gate). `configs/qwen25_3b_qlora.yaml` is a separate 3B research run on the same trainer.
 
 Measured results from real runs on an RTX 4060 — including a case where the gate
 caught the fine-tune destroying a capability the base model had — are in

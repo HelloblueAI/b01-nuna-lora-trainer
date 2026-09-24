@@ -70,4 +70,4 @@ Alpaca `instruction` / `input` / `output` is still accepted and converted.
 - Scraped web dumps without a clear license
 - Data that only exists to jailbreak or to attack others
 
-Official **helloblue.ai** chat does not train from this folder.
+Production NUna ([helloblue.ai/model-card](https://helloblue.ai/model-card)) does not train from this folder.
