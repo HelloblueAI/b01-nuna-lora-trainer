@@ -17,7 +17,7 @@ caught the fine-tune destroying a capability the base model had — are in
 
 ## Requirements
 
-- Linux, NVIDIA GPU + CUDA (~8GB) for **train** / **generation eval**
+- Linux, NVIDIA GPU + CUDA (~8GB) for **train** / **generation eval**. A 3B model in fp16 does not fit; use `configs/qwen25_3b_qlora.yaml`.
 - Python 3.10+
 - `--dry-run` and `--check-only` work without a GPU (CI)
 
@@ -42,6 +42,16 @@ python -m b01_nuna_lora.eval --check-only
 ```
 
 `--check-only` validates every probe without a GPU: unique non-empty `id`, a usable prompt, at least one matcher, and that each `any_must_match` / `must_not_match` pattern compiles as a regex. Bad probes fail in CI instead of crashing a GPU run mid-generation.
+
+## Troubleshooting
+
+From a real run on an RTX 4060 (8GB), loading `Qwen/Qwen2.5-3B-Instruct` in fp16 reserved 5,958 MiB and the first training forward then died with:
+
+```
+CUDA out of memory. Tried to allocate 44.00 MiB. GPU 0 has a total capacity of 7.60 GiB of which 62.69 MiB is free.
+```
+
+The same model with `configs/qwen25_3b_qlora.yaml` finished at 3,712 MiB reserved. That config is the fix: 4-bit base weights, batch size 1, gradient checkpointing.
 
 ## Train (GPU)
 

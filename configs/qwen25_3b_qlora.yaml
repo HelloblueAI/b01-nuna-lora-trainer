@@ -1,0 +1,38 @@
+# Qwen2.5-3B-Instruct in 4-bit. fp16 does not fit an 8GB card; this config does.
+# No TinyLlama chat template: the base tokenizer's own template is used, and
+# training preflights assistant masks before loading weights.
+# extra_data is appended to --data (default datasets/train.json). train.json
+# itself is unchanged.
+base_model: Qwen/Qwen2.5-3B-Instruct
+# Stock Qwen2.5 has no {% generation %} markers. This file is the stock template
+# plus those markers; rendering was checked byte-identical to the tokenizer's own.
+chat_template: configs/qwen25_chat_template.jinja
+assistant_only_loss: true
+seed: 42
+epochs: 8
+batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 2.0e-4
+max_length: 512
+warmup_steps: 10
+save_steps: 200
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+fp16: true
+fresh_start: true
+gradient_checkpointing: true
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_use_double_quant: true
+bnb_4bit_compute_dtype: bfloat16
+extra_data:
+  - datasets/community/general.json
