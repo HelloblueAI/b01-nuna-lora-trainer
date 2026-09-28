@@ -17,6 +17,16 @@ caught the fine-tune destroying a capability the base model had — are in
 - Conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
 - Model card (Hub copy): [`MODEL_CARD.md`](./MODEL_CARD.md)
 
+## Contributors
+
+People with a merged pull request. Handles link to GitHub.
+
+| | |
+| --- | --- |
+| [pejmantheory](https://github.com/pejmantheory) (Pejman Haghighatnia) | Started the workshop: the eval gate, assistant-only loss, QLoRA, the 3B run, and the docs that separate this trainer from production NUna. |
+
+New names are added when a contribution is merged.
+
 ## Requirements
 
 - Linux, NVIDIA GPU + CUDA (~8GB) for **train** / **generation eval**. A 3B model in fp16 does not fit; use `configs/qwen25_3b_qlora.yaml`.

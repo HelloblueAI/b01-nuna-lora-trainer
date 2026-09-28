@@ -4,6 +4,8 @@ This repo is how the community helps the **open-source workshop trainer**. It is
 
 Please read `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `datasets/README.md`.
 
+A merged pull request is credited in the Contributors section of `README.md`: your GitHub handle and a short line on what you added.
+
 ## You can contribute
 
 - Licensed SFT JSON under `datasets/community/` (your original work or a stated license)
