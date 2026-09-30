@@ -74,6 +74,17 @@ python -m b01_nuna_lora.train \
   --output outputs/adapter
 ```
 
+`configs/qwen25_3b_open_sft.yaml` trains the 3B QLoRA recipe on 2,000 rows of MIT-licensed UltraChat plus the local identity files. Raise `hf_max_samples` for a longer run. The loader refuses a corpus whose license is missing or non-commercial.
+
+Comparable scores, separate from the probe gate:
+
+```bash
+pip install -e ".[benchmarks]"
+python -m b01_nuna_lora.benchmark --adapter outputs/adapter --limit 50
+```
+
+That runs GSM8K, IFEval, and MMLU. Drop `--limit` for the full tasks. Run it again without `--adapter` for the base-model control.
+
 4-bit QLoRA (same recipe, base weights in NF4) is `configs/qlora.yaml`. It needs the extra: `pip install -e ".[qlora]"`. On this 1.1B model the memory saving is small; the path is what lets a 3B–8B base fit an 8GB card. Eval follows the adapter's `train_run.json` and loads the base in 4-bit when that is how it was trained (`--no-load-in-4bit` overrides).
 
 Uses TRL `SFTTrainer` with **assistant-only loss**, so gradients come from assistant turns only.

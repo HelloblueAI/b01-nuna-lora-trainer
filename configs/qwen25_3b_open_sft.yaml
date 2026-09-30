@@ -1,0 +1,40 @@
+# Same 4-bit Qwen2.5-3B recipe as configs/qwen25_3b_qlora.yaml, plus a permissive
+# Hub corpus. UltraChat is MIT. hf_max_samples caps the download so an 8GB card
+# can finish a run; raise it when you want a longer train.
+# Local datasets/train.json is still included, so the B01 identity rows stay in
+# the mix. They are a small fraction of 2000 general conversations.
+base_model: Qwen/Qwen2.5-3B-Instruct
+chat_template: configs/qwen25_chat_template.jinja
+assistant_only_loss: true
+seed: 42
+epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 2.0e-4
+max_length: 512
+warmup_steps: 20
+save_steps: 200
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+fp16: true
+fresh_start: true
+gradient_checkpointing: true
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_use_double_quant: true
+bnb_4bit_compute_dtype: bfloat16
+extra_data:
+  - datasets/community/general.json
+hf_dataset: HuggingFaceH4/ultrachat_200k
+hf_split: train_sft
+hf_max_samples: 2000
+hf_license: mit

@@ -14,7 +14,7 @@ from typing import Any
 
 import yaml
 
-from b01_nuna_lora.data import load_many
+from b01_nuna_lora.data import load_hf_messages, load_many
 from b01_nuna_lora.scoring import fingerprint_adapter, fingerprint_file
 
 TRACKED_PACKAGES = ("torch", "transformers", "trl", "peft", "accelerate", "datasets")
@@ -268,6 +268,16 @@ def main(argv: list[str] | None = None) -> int:
         extra = [extra]
     data_paths.extend(Path(path) for path in extra)
     records = load_many(data_paths)
+    hf_repo = cfg.get("hf_dataset")
+    if hf_repo:
+        hf_records = load_hf_messages(
+            str(hf_repo),
+            str(cfg.get("hf_split") or "train"),
+            max_samples=int(cfg.get("hf_max_samples") or 0),
+            license_id=str(cfg.get("hf_license") or ""),
+        )
+        records.extend(hf_records)
+        print(f"hub corpus {hf_repo}: {len(hf_records)} rows ({cfg.get('hf_license')})")
     seed = int(cfg.get("seed", 42))
     command = ["python", "-m", "b01_nuna_lora.train", *sys.argv[1:]]
     run_log = {
@@ -278,6 +288,10 @@ def main(argv: list[str] | None = None) -> int:
         "config": cfg,
         "data_path": [str(path) for path in data_paths],
         "data_sha256": {str(path): fingerprint_file(path) for path in data_paths},
+        "hf_dataset": hf_repo,
+        "hf_split": cfg.get("hf_split") if hf_repo else None,
+        "hf_max_samples": cfg.get("hf_max_samples") if hf_repo else None,
+        "hf_license": cfg.get("hf_license") if hf_repo else None,
         "n_examples": len(records),
         "seed": seed,
         "base_model": cfg.get("base_model"),

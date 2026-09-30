@@ -60,6 +60,58 @@ def load_many(paths: list[str | Path], *, min_records: int = 10) -> list[dict[st
     return records
 
 
+ALLOWED_CORPUS_LICENSES = frozenset({"mit", "apache-2.0"})
+
+
+def rows_to_records(
+    rows: Any, *, min_records: int = 10, source: str = "rows"
+) -> list[dict[str, Any]]:
+    """Turn chat-shaped dicts into SFT rows. A bad row fails the load."""
+    records: list[dict[str, Any]] = []
+    for i, item in enumerate(rows):
+        if not isinstance(item, dict):
+            raise ValueError(f"{source} row {i} is not an object")
+        try:
+            records.append(to_sft_row(item))
+        except ValueError as exc:
+            raise ValueError(f"{source} row {i}: {exc}") from exc
+    if len(records) < min_records:
+        raise ValueError(f"Need at least {min_records} records from {source}, got {len(records)}")
+    return records
+
+
+def load_hf_messages(
+    repo: str,
+    split: str,
+    *,
+    max_samples: int,
+    license_id: str,
+    min_records: int = 10,
+) -> list[dict[str, Any]]:
+    """Stream a Hub chat corpus. The license must be named, and it must be permissive.
+
+    A missing or non-commercial license stops the run. This trainer publishes MIT
+    code; it will not quietly train on a corpus we cannot ship beside it.
+    """
+    if license_id not in ALLOWED_CORPUS_LICENSES:
+        raise SystemExit(
+            f"hf_license must be one of {sorted(ALLOWED_CORPUS_LICENSES)}, got {license_id!r}. "
+            "Refusing to train on a corpus whose license is missing or non-commercial."
+        )
+    if max_samples < min_records:
+        raise SystemExit(f"hf_max_samples must be at least {min_records}, got {max_samples}")
+
+    from datasets import load_dataset
+
+    stream = load_dataset(repo, split=split, streaming=True)
+    rows = []
+    for i, row in enumerate(stream):
+        if i >= max_samples:
+            break
+        rows.append(dict(row))
+    return rows_to_records(rows, min_records=min_records, source=f"{repo}:{split}")
+
+
 def load_records(path: str | Path, *, min_records: int = 10) -> list[dict[str, Any]]:
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, list):
