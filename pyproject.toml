@@ -25,6 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.8"]
 qlora = ["bitsandbytes>=0.43.0"]
+benchmarks = ["lm-eval>=0.4.7"]
 
 [project.urls]
 Homepage = "https://github.com/HelloblueAI/b01-nuna-lora-trainer"
@@ -35,6 +36,7 @@ Documentation = "https://github.com/HelloblueAI/b01-nuna-lora-trainer/blob/main/
 b01-nuna-train = "b01_nuna_lora.train:main"
 b01-nuna-eval = "b01_nuna_lora.eval:main"
 b01-nuna-upload = "b01_nuna_lora.upload:main"
+b01-nuna-benchmark = "b01_nuna_lora.benchmark:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
