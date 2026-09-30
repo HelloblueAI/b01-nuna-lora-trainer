@@ -113,6 +113,25 @@ def _try_fingerprint(adapter: Path) -> str | None:
         return None
 
 
+def nonfinite_weight_keys(directory: str | Path) -> list[str]:
+    """Names of safetensors tensors that contain NaN or Inf.
+
+    A few corrupt values in a cached download are enough to make every logit NaN
+    and a long run report a nonsense loss. Catch that before training starts.
+    """
+    import torch
+    from safetensors import safe_open
+
+    bad: list[str] = []
+    for file in sorted(Path(directory).glob("*.safetensors")):
+        with safe_open(file, framework="pt") as handle:
+            for key in handle.keys():
+                tensor = handle.get_tensor(key)
+                if not torch.isfinite(tensor).all():
+                    bad.append(f"{file.name}:{key}")
+    return bad
+
+
 def quantization_kwargs(cfg: dict[str, Any]) -> dict[str, Any] | None:
     """BitsAndBytesConfig kwargs for QLoRA, or None when 4-bit is off.
 
@@ -322,6 +341,18 @@ def main(argv: list[str] | None = None) -> int:
 
     if not torch.cuda.is_available():
         raise SystemExit("CUDA is required for training. Use --dry-run without a GPU.")
+
+    from huggingface_hub import snapshot_download
+
+    weight_dir = snapshot_download(str(cfg["base_model"]), allow_patterns=["*.safetensors"])
+    corrupt = nonfinite_weight_keys(weight_dir)
+    if corrupt:
+        preview = ", ".join(corrupt[:3])
+        raise SystemExit(
+            f"Base model {cfg['base_model']} has non-finite weights ({preview}). "
+            "The cached download is corrupt. Delete that model from the Hugging Face "
+            "cache and run again so the files are fetched again."
+        )
 
     tokenizer = AutoTokenizer.from_pretrained(str(cfg["base_model"]))
     if tokenizer.pad_token is None:
