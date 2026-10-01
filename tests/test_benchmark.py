@@ -1,4 +1,4 @@
-from b01_nuna_lora.benchmark import DEFAULT_TASKS, model_args
+from b01_nuna_lora.benchmark import DEFAULT_TASKS, four_bit_load_kwargs, model_args
 
 
 def test_default_tasks_are_the_comparable_set():
@@ -24,3 +24,10 @@ def test_model_args_omit_peft_for_a_base_control():
     )
     assert "peft=" not in args
     assert "load_in_4bit" not in args
+
+
+def test_four_bit_flag_becomes_a_quantization_config():
+    cleaned = four_bit_load_kwargs({"load_in_4bit": True, "pretrained": "Qwen/x"})
+    assert "load_in_4bit" not in cleaned
+    assert cleaned["quantization_config"].load_in_4bit is True
+    assert cleaned["pretrained"] == "Qwen/x"
