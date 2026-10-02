@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "b01-nuna-lora-trainer"
-version = "0.1.0"
+version = "0.2.0"
 description = "Single-GPU PEFT LoRA SFT for TinyLlama (chat templates, eval gate)."
 readme = "README.md"
 license = { text = "MIT" }

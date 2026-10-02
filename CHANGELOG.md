@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+- Default TinyLlama recipe is 30 epochs, LoRA r=16, alpha=32, dropout=0.05, targets `q/k/v/o_proj` and `gate/up/down_proj`.
+- Optional `configs/qwen25_3b_qlora.yaml` and `configs/qwen25_3b_open_sft.yaml`. The open config adds 2,000 MIT-licensed UltraChat rows. The loader refuses a missing or non-commercial corpus license.
+- Eval is 17 probes: 11 required, 6 advisory. `--fail-on-regression` fails a run that loses a probe the base model passed.
+- `python -m b01_nuna_lora.benchmark` runs GSM8K, IFEval, and MMLU with the chat template on.
+- `--allow-unverified-upload` can create only a private repo. Combining it with `--no-private` is refused.
+- Training refuses to start if the cached base safetensors contain non-finite values.
+- Measured UltraChat run (loss 1.074, 229 steps, 5,022 MiB) is in `docs/EVIDENCE.md`. That adapter failed the probe gate and is not a public release.
+
 ## Unreleased
 
 ### Fixed

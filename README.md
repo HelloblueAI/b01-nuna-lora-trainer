@@ -2,7 +2,7 @@
 
 Open-source workshop for single-GPU PEFT LoRA SFT. **This is not the production NUna system.** Production NUna is described only at [helloblue.ai/model-card](https://helloblue.ai/model-card). Training, eval, and any Hub upload from this repo do not change that system.
 
-The default recipe fine-tunes [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) (chat templates, eval gate). `configs/qwen25_3b_qlora.yaml` is a separate 3B research run on the same trainer.
+The default recipe fine-tunes [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) for 30 epochs with LoRA r=16, alpha=32, dropout=0.05 on `q/k/v/o_proj` and `gate/up/down_proj`. The eval file has 17 probes (11 required, 6 advisory). `configs/qwen25_3b_qlora.yaml` and `configs/qwen25_3b_open_sft.yaml` are optional 3B QLoRA runs. The 2,000-row UltraChat run trained, then failed the probe gate. Numbers are in [`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
 
 Measured results from real runs on an RTX 4060 — including a case where the gate
 caught the fine-tune destroying a capability the base model had — are in
@@ -80,10 +80,11 @@ Comparable scores, separate from the probe gate:
 
 ```bash
 pip install -e ".[benchmarks]"
-python -m b01_nuna_lora.benchmark --adapter outputs/adapter --limit 50
+python -m b01_nuna_lora.benchmark --base-model Qwen/Qwen2.5-3B-Instruct --report outputs/benchmark_base.json
+python -m b01_nuna_lora.benchmark --base-model Qwen/Qwen2.5-3B-Instruct --adapter outputs/adapter --report outputs/benchmark_adapter.json
 ```
 
-That runs GSM8K, IFEval, and MMLU. Drop `--limit` for the full tasks. Run it again without `--adapter` for the base-model control.
+That runs full GSM8K, IFEval, and MMLU with the chat template. `--limit` is only a smoke check. The upload gate is still the probe file, not these scores.
 
 4-bit QLoRA (same recipe, base weights in NF4) is `configs/qlora.yaml`. It needs the extra: `pip install -e ".[qlora]"`. On this 1.1B model the memory saving is small; the path is what lets a 3B–8B base fit an 8GB card. Eval follows the adapter's `train_run.json` and loads the base in 4-bit when that is how it was trained (`--no-load-in-4bit` overrides).
 

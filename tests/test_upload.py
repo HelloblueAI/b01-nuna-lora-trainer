@@ -112,6 +112,21 @@ def test_check_only_report_blocks_the_upload(tmp_path, hub):
     assert hub["upload_folder"] is None
 
 
+def test_unverified_upload_cannot_be_public(tmp_path, hub):
+    adapter = _adapter(tmp_path)
+    with pytest.raises(SystemExit, match="public repo"):
+        upload_main(
+            [
+                "--adapter", str(adapter),
+                "--repo", "demo/x",
+                "--no-private",
+                "--allow-unverified-upload",
+            ]
+        )
+    assert hub["create_repo"] is None
+    assert hub["upload_folder"] is None
+
+
 def test_allow_unverified_upload_bypasses_the_gate(tmp_path, hub):
     adapter = _adapter(tmp_path)
     assert (
@@ -125,6 +140,7 @@ def test_allow_unverified_upload_bypasses_the_gate(tmp_path, hub):
         )
         == 0
     )
+    assert hub["create_repo"]["private"] is True
     assert hub["upload_folder"] is not None
 
 

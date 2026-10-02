@@ -49,14 +49,17 @@ model = PeftModel.from_pretrained(base, ADAPTER)
 See the GitHub workshop: [HelloblueAI/b01-nuna-lora-trainer](https://github.com/HelloblueAI/b01-nuna-lora-trainer).
 
 - Method: TRL `SFTTrainer` + patched `chat_template` with `{% generation %}` markers (assistant-only loss)
-- LoRA: r=16, alpha=32, dropout=0.05, `q/k/v/o_proj` + `gate/up/down_proj`
-- Data: Helloblue-authored smoke SFT (MIT), not a web scrape
+- Default: TinyLlama-1.1B, 30 epochs, LoRA r=16, alpha=32, dropout=0.05, targets `q/k/v/o_proj` and `gate/up/down_proj`
+- Optional: Qwen2.5-3B 4-bit QLoRA, including a 2,000-row MIT UltraChat mix (`configs/qwen25_3b_open_sft.yaml`)
+- Data: Helloblue-authored smoke SFT (MIT). The UltraChat mix is separate and MIT-licensed. Not a web scrape of product logs.
 
 ## Evaluation
 
-Probes in `datasets/eval_probes.json` (identity, simple facts, safety). Upload to Hub requires a **generation** eval report (`mode=generation`), not `--check-only`, and the report is bound to the adapter by SHA-256 — a report from a different or retrained adapter is rejected.
+`datasets/eval_probes.json` has 17 probes: 11 required and 6 advisory. Upload to Hub requires a **generation** eval report (`mode=generation`), not `--check-only`, and the report is bound to the adapter by SHA-256. A report from a different or retrained adapter is rejected. `--allow-unverified-upload` can create only a private repo.
 
-Eval also scores every probe against the base model with the LoRA disabled. Treat the `comparison` block of a report as the honest summary: the required probes paraphrase training rows, so several of them pass on stock TinyLlama and only the `gained` list reflects what this adapter changed.
+Eval scores every probe against the base model with the LoRA disabled. `--fail-on-regression` fails the run if the adapter loses a probe the base passed. GSM8K, IFEval, and MMLU are a separate command (`python -m b01_nuna_lora.benchmark`) and are not a substitute for the probe gate.
+
+The 2026-09-30 UltraChat adapter (loss 1.074) failed that gate: 7/11 required, and it regressed `gen-refusal-phishing`. It is not approved for a public Hub release. See `docs/EVIDENCE.md`.
 
 ## Maintainers
 
