@@ -1,0 +1,105 @@
+{
+  "status": "completed",
+  "started_at": "2026-09-30T09:40:12.136673+00:00",
+  "command": [
+    "python",
+    "-m",
+    "b01_nuna_lora.train",
+    "--config",
+    "configs/qwen25_3b_open_sft.yaml",
+    "--output",
+    "artifacts/adapter-qwen3b-open"
+  ],
+  "config_path": "configs/qwen25_3b_open_sft.yaml",
+  "config": {
+    "base_model": "Qwen/Qwen2.5-3B-Instruct",
+    "chat_template": "configs/qwen25_chat_template.jinja",
+    "assistant_only_loss": true,
+    "seed": 42,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.0002,
+    "max_length": 512,
+    "warmup_steps": 20,
+    "save_steps": 200,
+    "lora_rank": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "fp16": true,
+    "fresh_start": true,
+    "gradient_checkpointing": true,
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16",
+    "extra_data": [
+      "datasets/community/general.json"
+    ],
+    "hf_dataset": "HuggingFaceH4/ultrachat_200k",
+    "hf_split": "train_sft",
+    "hf_max_samples": 2000,
+    "hf_license": "mit"
+  },
+  "data_path": [
+    "datasets/train.json",
+    "datasets/community/general.json"
+  ],
+  "data_sha256": {
+    "datasets/train.json": "b5340ba6d62ba6f7de72e82b9c798a79e503bb82186eb044db45c2a54d6b1825",
+    "datasets/community/general.json": "e8e4ed79460d038ddf5bca7e62355eab55e9eb87c0ded552848c1a946f5bcd98"
+  },
+  "hf_dataset": "HuggingFaceH4/ultrachat_200k",
+  "hf_split": "train_sft",
+  "hf_max_samples": 2000,
+  "hf_license": "mit",
+  "n_examples": 2054,
+  "seed": 42,
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "dry_run": false,
+  "packages": {
+    "torch": "2.10.0",
+    "transformers": "5.17.0",
+    "trl": "1.13.0",
+    "peft": "0.20.0",
+    "accelerate": "1.15.0",
+    "datasets": "5.0.1"
+  },
+  "note": "Smoke/SFT scale. Promote Hub tags only after generation eval.",
+  "chat_template_path": "configs/qwen25_chat_template.jinja",
+  "chat_template_sha256": "624c824955cb037ca14156ab81f53e1d37d2212426f3175a0e1679d8c946193f",
+  "load_in_4bit": true,
+  "quantization": {
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "train_precision": "bf16",
+  "supervised_tokens_first_example": 42,
+  "dropped_sft_config_kwargs": [
+    "max_seq_length"
+  ],
+  "dropped_trainer_kwargs": [
+    "tokenizer"
+  ],
+  "gpu": "NVIDIA GeForce RTX 4060",
+  "completed_at": "2026-09-30T10:07:03.975282+00:00",
+  "duration_seconds": 1599.35,
+  "final_train_loss": 1.0735920776966879,
+  "global_step": 229,
+  "adapter_sha256": "f828fcb0d4de658d046740ae7bd868ccae083715b2333e879dbb312be9699477",
+  "train_samples_per_second": 1.145,
+  "peak_vram_mib": 4146.1,
+  "peak_vram_reserved_mib": 5022.0,
+  "total_vram_mib": 7782.8
+}

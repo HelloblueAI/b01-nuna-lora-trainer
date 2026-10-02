@@ -26,12 +26,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--allow-unverified-upload",
         action="store_true",
-        help="Skip eval gate (discouraged; never use for a public Hub tag)",
+        help="Skip the eval gate. Allowed only for a private repo; cannot publish publicly.",
     )
     args = parser.parse_args(argv)
 
     if not args.repo:
         raise SystemExit("Pass --repo OWNER/NAME or set HF_REPO_ID")
+
+    if args.allow_unverified_upload and not args.private:
+        raise SystemExit(
+            "Refusing --allow-unverified-upload with a public repo. "
+            "A bypass can upload only with the default private visibility. "
+            "Drop --no-private, or pass a passing --eval-report and omit the bypass."
+        )
 
     missing = [
         name
