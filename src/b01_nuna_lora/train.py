@@ -287,6 +287,12 @@ def main(argv: list[str] | None = None) -> int:
         extra = [extra]
     data_paths.extend(Path(path) for path in extra)
     records = load_many(data_paths)
+    repeats = int(cfg.get("local_repeats") or 1)
+    if repeats < 1:
+        raise SystemExit(f"local_repeats must be >= 1, got {repeats}")
+    if repeats > 1:
+        records = records * repeats
+        print(f"repeated local rows x{repeats} → {len(records)}")
     hf_repo = cfg.get("hf_dataset")
     if hf_repo:
         hf_records = load_hf_messages(
@@ -311,6 +317,7 @@ def main(argv: list[str] | None = None) -> int:
         "hf_split": cfg.get("hf_split") if hf_repo else None,
         "hf_max_samples": cfg.get("hf_max_samples") if hf_repo else None,
         "hf_license": cfg.get("hf_license") if hf_repo else None,
+        "local_repeats": repeats,
         "n_examples": len(records),
         "seed": seed,
         "base_model": cfg.get("base_model"),
