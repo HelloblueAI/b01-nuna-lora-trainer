@@ -1,7 +1,7 @@
-# Does not fit an 8GB card. Use configs/qwen25_3b_post_dpo.yaml on an RTX 4060.
-# Preference stage after configs/qwen25_7b_sft.yaml. MIT UltraFeedback.
+# Measured: Qwen2.5-7B 4-bit does not fit an 8GB RTX 4060 (bitsandbytes refused a CPU offload). This is the same mix on the 3B base that does fit.
+# Preference stage after configs/qwen25_3b_post_sft.yaml. MIT UltraFeedback.
 # The SFT adapter is passed on the command line. This file is the data and the step size.
-base_model: Qwen/Qwen2.5-7B-Instruct
+base_model: Qwen/Qwen2.5-3B-Instruct
 chat_template: configs/qwen25_chat_template.jinja
 seed: 42
 epochs: 1
