@@ -1,0 +1,39 @@
+# Qwen2.5-7B-Instruct in 4-bit. Identity and safety rows are repeated so a large
+# general corpus cannot wash them out the way 2,000 UltraChat rows did.
+base_model: Qwen/Qwen2.5-7B-Instruct
+chat_template: configs/qwen25_chat_template.jinja
+assistant_only_loss: true
+seed: 42
+epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 1.0e-4
+max_length: 512
+warmup_steps: 20
+save_steps: 500
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+fp16: true
+fresh_start: true
+gradient_checkpointing: true
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_use_double_quant: true
+bnb_4bit_compute_dtype: bfloat16
+local_repeats: 80
+extra_data:
+  - datasets/community/general.json
+  - datasets/community/safety_refusals.json
+hf_dataset: HuggingFaceH4/ultrachat_200k
+hf_split: train_sft
+hf_max_samples: 8000
+hf_license: mit

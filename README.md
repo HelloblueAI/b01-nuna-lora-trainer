@@ -74,7 +74,7 @@ python -m b01_nuna_lora.train \
   --output outputs/adapter
 ```
 
-`configs/qwen25_3b_open_sft.yaml` trains the 3B QLoRA recipe on 2,000 rows of MIT-licensed UltraChat plus the local identity files. Raise `hf_max_samples` for a longer run. The loader refuses a corpus whose license is missing or non-commercial.
+`configs/qwen25_7b_sft.yaml` is the post-training recipe: Qwen2.5-7B in 4-bit, local identity and safety rows repeated, then 8,000 MIT UltraChat rows. `python -m b01_nuna_lora.dpo` is the preference stage on that adapter, using MIT UltraFeedback. The 2,000-row UltraChat adapter failed the probe gate and is not a release. Nothing is uploaded until `--fail-on-regression` exits 0.
 
 Comparable scores, separate from the probe gate:
 
