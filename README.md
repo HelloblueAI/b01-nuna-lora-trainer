@@ -80,10 +80,11 @@ Comparable scores, separate from the probe gate:
 
 ```bash
 pip install -e ".[benchmarks]"
-python -m b01_nuna_lora.benchmark --adapter outputs/adapter --limit 50
+python -m b01_nuna_lora.benchmark --base-model Qwen/Qwen2.5-3B-Instruct --report outputs/benchmark_base.json
+python -m b01_nuna_lora.benchmark --base-model Qwen/Qwen2.5-3B-Instruct --adapter outputs/adapter --report outputs/benchmark_adapter.json
 ```
 
-That runs GSM8K, IFEval, and MMLU. Drop `--limit` for the full tasks. Run it again without `--adapter` for the base-model control.
+That runs full GSM8K, IFEval, and MMLU with the chat template. `--limit` is only a smoke check. The upload gate is still the probe file, not these scores.
 
 4-bit QLoRA (same recipe, base weights in NF4) is `configs/qlora.yaml`. It needs the extra: `pip install -e ".[qlora]"`. On this 1.1B model the memory saving is small; the path is what lets a 3B–8B base fit an 8GB card. Eval follows the adapter's `train_run.json` and loads the base in 4-bit when that is how it was trained (`--no-load-in-4bit` overrides).
 

@@ -140,6 +140,7 @@ def test_allow_unverified_upload_bypasses_the_gate(tmp_path, hub):
         )
         == 0
     )
+    assert hub["create_repo"]["private"] is True
     assert hub["upload_folder"] is not None
 
 
