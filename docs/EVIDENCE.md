@@ -17,7 +17,7 @@ with the commands shown.
 | targets | q/k/v/o_proj + gate/up/down_proj | same | same |
 | data | `datasets/train.json` (30) | plus `datasets/community/general.json` | those plus 2,000 MIT UltraChat rows |
 
-Eval is 17 probes: 11 required, 6 advisory. Comparable scores are GSM8K, IFEval, and MMLU via `python -m b01_nuna_lora.benchmark` with the chat template on. Those three scores are not in this file yet: the base-model run was interrupted before it wrote a report, and it has to be finished before the adapter is scored.
+Eval is 17 probes: 11 required, 6 advisory. Comparable scores are GSM8K, IFEval, and MMLU via `python -m b01_nuna_lora.benchmark` with the chat template on. Full scores for the base model, the SFT adapter, and the DPO adapter are in the section below. Both adapters regress IFEval, so the 8,000-row stack is not a release.
 
 ## Open-corpus training run (2026-09-30)
 
@@ -59,6 +59,74 @@ Contamination against the local 54 rows (`train.json` + `community/general.json`
 ### A run that does pass `--fail-on-regression`
 
 The earlier Qwen2.5-3B adapter trained only on the local identity files (`artifacts/adapter-qwen3b`, 23 Sep) was scored again with `--fail-on-regression` on 2026-10-01. Result: 11/11 required, 6/6 advisory, base alone 13/17, gained `identity-name`, `jailbreak-identity`, `gen-identity-indirect`, `gen-identity-third-person`, regressions none. The command exits 0. That is a different adapter from the UltraChat run. The UltraChat adapter must not be uploaded.
+
+## 8,000-row 3B post-training (not a release)
+
+Configs: `configs/qwen25_3b_post_sft.yaml` then `configs/qwen25_3b_post_dpo.yaml`. Base `Qwen/Qwen2.5-3B-Instruct`. The files on the Hub at the revision recorded in `BASE_MODEL_LICENSES.md` are the Qwen Research License for this 3B model, and MIT for UltraChat and UltraFeedback. The training logs were written before revision fields existed, so `train_run.json` and `dpo_run.json` do not contain a commit SHA. The copies in the local Hugging Face cache, which are the weights those runs loaded, are:
+
+| | revision |
+|---|---|
+| `Qwen/Qwen2.5-3B-Instruct` | `aa8e72537993ba99e69dfaafa59ed015b17504d1` |
+| `HuggingFaceH4/ultrachat_200k` | `8049631c405ae6576f93f445c6b8166f76f5505a` |
+| `HuggingFaceH4/ultrafeedback_binarized` | `3949bf5f8c17c394422ccfab0c31ea9c20bdeb85` |
+
+### SFT stage
+
+`artifacts/adapter-qwen3b-post-sft/train_run.json`. Started 2026-10-02T05:10:38Z, completed 2026-10-02T07:19:56Z.
+
+| | value |
+|---|---|
+| config | `configs/qwen25_3b_post_sft.yaml` |
+| data | local rows × 80, plus 8,000 UltraChat `train_sft` rows |
+| examples | 12,720 |
+| steps | 1,482 |
+| duration | 7,735.68 s |
+| final loss | 0.990 |
+| peak allocated / reserved | 4,146.1 / 5,022.0 MiB |
+| adapter sha256 | `231e7dd3209c1db91f2a1246e513b39cf96e6ae075bf2d82ba0195257ae7fc6c` |
+| `datasets/train.json` | `b5340ba6d62ba6f7de72e82b9c798a79e503bb82186eb044db45c2a54d6b1825` |
+| `datasets/community/general.json` | `e8e4ed79460d038ddf5bca7e62355eab55e9eb87c0ded552848c1a946f5bcd98` |
+| `datasets/community/safety_refusals.json` | `e007844c66c9e05a4fd9a1686647b9e8a511aadb13d8aafa45bbf8d6b86848aa` |
+
+Probe eval on 2026-10-04, 4-bit, `--fail-on-regression` exit 0. Report `artifacts/eval_qwen3b_post_sft.json`.
+
+| | base | SFT adapter |
+|---|---|---|
+| required | 7/11 | 11/11 |
+| advisory | 6/6 | 6/6 |
+| total | 13/17 | 17/17 |
+
+The report's base summary is 13/17. Gained: `identity-name`, `jailbreak-identity`, `gen-identity-indirect`, `gen-identity-third-person`. Regressed: none.
+
+### DPO stage
+
+`artifacts/adapter-qwen3b-post-dpo/dpo_run.json`. 4,000 MIT UltraFeedback `train_prefs` rows. Final loss 0.665, 461 steps. Adapter sha256 `2c78325eed35d09366b28234a4c07ff69e7a610a60967ffbbc02bd9ebbeea555`. That file does not record duration or peak VRAM.
+
+Probe eval `artifacts/eval_qwen3b_post.json` (2026-10-02T08:33:25Z), `--fail-on-regression` exit 0.
+
+| | base | DPO adapter |
+|---|---|---|
+| required | 7/11 | 11/11 |
+| advisory | 6/6 | 6/6 |
+| total | 13/17 | 17/17 |
+
+Gained the same four identity probes. Regressed: none on the probe file.
+
+### Standard benchmarks (full, no `--limit`)
+
+4-bit, chat template on, no `--limit`. Base report `artifacts/benchmark_base.json`. SFT report `artifacts/benchmark_sft.json` (adapter `artifacts/adapter-qwen3b-post-sft`, written 2026-10-04T06:11:05Z). DPO report `artifacts/benchmark_adapter.json` (adapter `artifacts/adapter-qwen3b-post-dpo`).
+
+| | base | SFT adapter | DPO adapter |
+|---|---|---|---|
+| GSM8K flexible-extract | 0.6285 | 0.6846 | 0.6831 |
+| GSM8K strict-match | 0.0516 | 0.5284 | 0.4663 |
+| IFEval prompt-level strict | 0.5823 | 0.4972 | 0.5065 |
+| IFEval instruction-level strict | 0.6715 | 0.5947 | 0.5983 |
+| MMLU accuracy | 0.6063 | 0.6326 | 0.6323 |
+
+The strict GSM8K jump is mostly the `####` answer format. Flexible-extract is the fairer math comparison: about +5.6 points for SFT and +5.5 for DPO. MMLU is up by about 2.6 points on both. IFEval prompt-level strict accuracy fell from 0.5823 to 0.4972 (SFT) and 0.5065 (DPO). That is a real regression against the base model, in the same sense as the earlier phishing-probe regression: the adapter is worse than the base on a measured task. Probe regressions are empty. Standard-benchmark IFEval is not.
+
+Neither adapter is approved for a public upload. Both finished their reports, and both regressed IFEval.
 
 ## Scope
 

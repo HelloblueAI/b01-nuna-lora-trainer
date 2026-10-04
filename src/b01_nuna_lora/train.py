@@ -15,6 +15,7 @@ from typing import Any
 import yaml
 
 from b01_nuna_lora.data import load_hf_messages, load_many
+from b01_nuna_lora.licenses import approved_base
 from b01_nuna_lora.scoring import fingerprint_adapter, fingerprint_file
 
 TRACKED_PACKAGES = ("torch", "transformers", "trl", "peft", "accelerate", "datasets")
@@ -281,6 +282,8 @@ def main(argv: list[str] | None = None) -> int:
     cfg = _load_config(args.config)
     # Reject a bad 4-bit config before the dry-run return, so CI catches it.
     quantization_kwargs(cfg)
+    base_spec = approved_base(str(cfg.get("base_model") or ""), cfg.get("base_model_revision"))
+    base_revision = str(base_spec["revision"])
     data_paths = [Path(path) for path in args.data]
     extra = cfg.get("extra_data") or []
     if isinstance(extra, str):
@@ -300,6 +303,7 @@ def main(argv: list[str] | None = None) -> int:
             str(cfg.get("hf_split") or "train"),
             max_samples=int(cfg.get("hf_max_samples") or 0),
             license_id=str(cfg.get("hf_license") or ""),
+            revision=str(cfg.get("hf_revision") or ""),
         )
         records.extend(hf_records)
         print(f"hub corpus {hf_repo}: {len(hf_records)} rows ({cfg.get('hf_license')})")
@@ -321,6 +325,8 @@ def main(argv: list[str] | None = None) -> int:
         "n_examples": len(records),
         "seed": seed,
         "base_model": cfg.get("base_model"),
+        "base_model_revision": base_revision,
+        "hf_revision": cfg.get("hf_revision") if hf_repo else None,
         "dry_run": bool(args.dry_run),
         "packages": _package_versions(),
         "note": "Smoke/SFT scale. Promote Hub tags only after generation eval.",
@@ -351,7 +357,11 @@ def main(argv: list[str] | None = None) -> int:
 
     from huggingface_hub import snapshot_download
 
-    weight_dir = snapshot_download(str(cfg["base_model"]), allow_patterns=["*.safetensors"])
+    weight_dir = snapshot_download(
+        str(cfg["base_model"]),
+        revision=base_revision,
+        allow_patterns=["*.safetensors"],
+    )
     corrupt = nonfinite_weight_keys(weight_dir)
     if corrupt:
         preview = ", ".join(corrupt[:3])
@@ -361,7 +371,7 @@ def main(argv: list[str] | None = None) -> int:
             "cache and run again so the files are fetched again."
         )
 
-    tokenizer = AutoTokenizer.from_pretrained(str(cfg["base_model"]))
+    tokenizer = AutoTokenizer.from_pretrained(str(cfg["base_model"]), revision=base_revision)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -414,6 +424,7 @@ def main(argv: list[str] | None = None) -> int:
         "eval_strategy": "no",
         "load_best_model_at_end": False,
         "gradient_checkpointing": bool(cfg.get("gradient_checkpointing", False)),
+        "model_init_kwargs": {"revision": base_revision},
     }
 
     quant = quantization_kwargs(cfg)

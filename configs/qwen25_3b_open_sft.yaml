@@ -4,6 +4,7 @@
 # Local datasets/train.json is still included, so the B01 identity rows stay in
 # the mix. They are a small fraction of 2000 general conversations.
 base_model: Qwen/Qwen2.5-3B-Instruct
+base_model_revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
 chat_template: configs/qwen25_chat_template.jinja
 assistant_only_loss: true
 seed: 42
@@ -38,3 +39,4 @@ hf_dataset: HuggingFaceH4/ultrachat_200k
 hf_split: train_sft
 hf_max_samples: 2000
 hf_license: mit
+hf_revision: 8049631c405ae6576f93f445c6b8166f76f5505a

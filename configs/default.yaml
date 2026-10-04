@@ -1,4 +1,5 @@
 base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+base_model_revision: fe8a4ea1ffedaf415f4da2f062534de366a451e6
 # Stock TinyLlama has no {% generation %} markers, so assistant_only_loss would supervise
 # nothing. This template is the stock one plus those markers; rendering is byte-identical.
 chat_template: configs/tinyllama_chat_template.jinja

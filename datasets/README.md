@@ -6,7 +6,7 @@ language:
 tags:
   - sft
   - chat
-  - tinylama
+  - tinyllama
   - helloblue
 task_categories:
   - text-generation

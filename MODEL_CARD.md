@@ -7,7 +7,7 @@ base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
 tags:
   - lora
   - peft
-  - tinylama
+  - tinyllama
   - helloblue
   - b01-nuna
 pipeline_tag: text-generation
@@ -15,7 +15,7 @@ pipeline_tag: text-generation
 
 # B01-NUna LoRA (workshop artifact)
 
-**This research artifact is not the production NUna system.** Production NUna has its own model card at [helloblue.ai/model-card](https://helloblue.ai/model-card). This card describes a **PEFT LoRA workshop** for research, identity smoke tests, and community SFT. A Hub repo published from this trainer is still that workshop adapter.
+**This research artifact is not the production NUna system.** Production NUna has its own model card at [helloblue.ai/model-card](https://helloblue.ai/model-card). This card describes the **TinyLlama PEFT LoRA workshop**. It is not the card for a Qwen adapter. Qwen2.5-3B-Instruct is under the Qwen Research License (`license: other`), not MIT, and is not commercially usable without a separate license. See `BASE_MODEL_LICENSES.md`. Upload generates a card from the adapter's recorded base model and will not attach this file to a Qwen adapter.
 
 ## Intended use
 

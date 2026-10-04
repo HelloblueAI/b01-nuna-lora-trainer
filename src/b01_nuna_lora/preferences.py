@@ -28,7 +28,12 @@ def preference_example(row: dict[str, Any]) -> dict[str, list[dict[str, str]]]:
 
 
 def load_preferences(
-    repo: str, split: str, *, max_samples: int, license_id: str
+    repo: str,
+    split: str,
+    *,
+    max_samples: int,
+    license_id: str,
+    revision: str | None = None,
 ) -> list[dict[str, Any]]:
     if license_id not in ALLOWED_CORPUS_LICENSES:
         raise SystemExit(
@@ -37,9 +42,13 @@ def load_preferences(
     if max_samples < 1:
         raise SystemExit(f"hf_max_samples must be positive, got {max_samples}")
 
+    from b01_nuna_lora.licenses import approved_dataset
+
+    approved_dataset(repo, license_id, revision)
+
     from datasets import load_dataset
 
-    stream = load_dataset(repo, split=split, streaming=True)
+    stream = load_dataset(repo, split=split, streaming=True, revision=revision)
     rows: list[dict[str, Any]] = []
     for i, row in enumerate(stream):
         if i >= max_samples:

@@ -86,6 +86,7 @@ def load_hf_messages(
     *,
     max_samples: int,
     license_id: str,
+    revision: str | None = None,
     min_records: int = 10,
 ) -> list[dict[str, Any]]:
     """Stream a Hub chat corpus. The license must be named, and it must be permissive.
@@ -101,9 +102,13 @@ def load_hf_messages(
     if max_samples < min_records:
         raise SystemExit(f"hf_max_samples must be at least {min_records}, got {max_samples}")
 
+    from b01_nuna_lora.licenses import approved_dataset
+
+    approved_dataset(repo, license_id, revision)
+
     from datasets import load_dataset
 
-    stream = load_dataset(repo, split=split, streaming=True)
+    stream = load_dataset(repo, split=split, streaming=True, revision=revision)
     rows = []
     for i, row in enumerate(stream):
         if i >= max_samples:

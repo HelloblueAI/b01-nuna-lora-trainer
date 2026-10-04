@@ -13,7 +13,7 @@ caught the fine-tune destroying a capability the base model had — are in
 ## Community
 
 - Data and evals: [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`datasets/community/`](./datasets/community/), [`GOVERNANCE.md`](./GOVERNANCE.md)
-- License: MIT ([`LICENSE`](./LICENSE))
+- License: MIT code ([`LICENSE`](./LICENSE)). Base models and corpora: [`BASE_MODEL_LICENSES.md`](./BASE_MODEL_LICENSES.md)
 - Conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
 - Model card (Hub copy): [`MODEL_CARD.md`](./MODEL_CARD.md)
 
@@ -32,6 +32,8 @@ New names are added when a contribution is merged.
 - Linux, NVIDIA GPU + CUDA (~8GB) for **train** / **generation eval**. A 3B model in fp16 does not fit; use `configs/qwen25_3b_qlora.yaml`.
 - Python 3.10+
 - `--dry-run` and `--check-only` work without a GPU (CI)
+
+v0.2.0 is a **GitHub source release**. The PyPI wheel is not published: it would omit `configs/`, `datasets/`, and the model-card files the documented commands use. Clone this repository and install from the checkout.
 
 ## Setup
 
@@ -74,7 +76,7 @@ python -m b01_nuna_lora.train \
   --output outputs/adapter
 ```
 
-`configs/qwen25_7b_sft.yaml` is the post-training recipe: Qwen2.5-7B in 4-bit, local identity and safety rows repeated, then 8,000 MIT UltraChat rows. `python -m b01_nuna_lora.dpo` is the preference stage on that adapter, using MIT UltraFeedback. The 2,000-row UltraChat adapter failed the probe gate and is not a release. Nothing is uploaded until `--fail-on-regression` exits 0.
+The 8GB post-training path is `configs/qwen25_3b_post_sft.yaml` (Qwen2.5-3B-Instruct in 4-bit, local identity and safety rows repeated, then 8,000 MIT UltraChat rows) and `configs/qwen25_3b_post_dpo.yaml` (MIT UltraFeedback). Qwen2.5-3B-Instruct is under the Qwen Research License, not MIT or Apache 2.0. A Qwen adapter is not commercially usable without a separate license from Alibaba. The 7B configs are unsupported on this card and live in `configs/unsupported/`. The 2,000-row UltraChat adapter failed the probe gate and is not a release. Nothing is uploaded until `--fail-on-regression` exits 0 and the generated model card matches the base model.
 
 Comparable scores, separate from the probe gate:
 

@@ -1,7 +1,9 @@
-# Measured: Qwen2.5-7B 4-bit does not fit an 8GB RTX 4060 (bitsandbytes refused a CPU offload). This is the same mix on the 3B base that does fit.
-# Qwen2.5-7B-Instruct in 4-bit. Identity and safety rows are repeated so a large
-# general corpus cannot wash them out the way 2,000 UltraChat rows did.
+# Working 8GB recipe. Qwen2.5-3B-Instruct in 4-bit. Identity and safety rows are
+# repeated so a large general corpus cannot wash them out the way 2,000 UltraChat
+# rows did. Qwen2.5-7B does not fit this card; those files live in configs/unsupported/.
+# The base model is under the Qwen Research License, not MIT. See BASE_MODEL_LICENSES.md.
 base_model: Qwen/Qwen2.5-3B-Instruct
+base_model_revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
 chat_template: configs/qwen25_chat_template.jinja
 assistant_only_loss: true
 seed: 42
@@ -38,3 +40,4 @@ hf_dataset: HuggingFaceH4/ultrachat_200k
 hf_split: train_sft
 hf_max_samples: 8000
 hf_license: mit
+hf_revision: 8049631c405ae6576f93f445c6b8166f76f5505a

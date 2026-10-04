@@ -4,6 +4,7 @@
 # extra_data is appended to --data (default datasets/train.json). train.json
 # itself is unchanged.
 base_model: Qwen/Qwen2.5-3B-Instruct
+base_model_revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
 # Stock Qwen2.5 has no {% generation %} markers. This file is the stock template
 # plus those markers; rendering was checked byte-identical to the tokenizer's own.
 chat_template: configs/qwen25_chat_template.jinja

@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "b01-nuna-lora-trainer"
 version = "0.2.0"
-description = "Single-GPU PEFT LoRA SFT for TinyLlama (chat templates, eval gate)."
+description = "Single-GPU PEFT LoRA and QLoRA trainer with a gated evaluation before any Hub upload. GitHub source release; the wheel does not contain the configs or datasets."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "Helloblue Inc" }]
-keywords = ["lora", "peft", "trl", "tinylama", "sft"]
+keywords = ["lora", "qlora", "peft", "trl", "tinyllama", "sft"]
 dependencies = [
   "transformers>=4.45.0,<6",
   "datasets>=3.0.0,<6",
