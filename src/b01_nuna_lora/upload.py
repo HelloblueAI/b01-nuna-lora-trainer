@@ -6,6 +6,7 @@ import argparse
 import os
 from pathlib import Path
 
+from b01_nuna_lora.cards import write_adapter_card
 from b01_nuna_lora.scoring import require_passing_report
 
 ADAPTER_FILES = (
@@ -13,7 +14,6 @@ ADAPTER_FILES = (
     "adapter_model.safetensors",
     "tokenizer.json",
     "tokenizer_config.json",
-    "MODEL_CARD.md",
 )
 
 
@@ -48,27 +48,34 @@ def main(argv: list[str] | None = None) -> int:
     if missing:
         raise SystemExit(f"Adapter dir missing {missing}")
 
+    report = None
     if not args.allow_unverified_upload:
-        require_passing_report(args.eval_report, adapter=args.adapter)
+        report = require_passing_report(args.eval_report, adapter=args.adapter)
+
+    # Generate the card before create_repo. A missing or wrong card must not publish.
+    # MODEL_CARD.md in the working directory is ignored: it is the TinyLlama workshop card.
+    write_adapter_card(args.adapter, report, public=not args.private)
 
     from huggingface_hub import HfApi
 
     api = HfApi(token=os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_API_KEY"))
     api.create_repo(args.repo, repo_type="model", private=args.private, exist_ok=True)
 
-    card = Path("MODEL_CARD.md")
-    if card.exists():
-        (args.adapter / "README.md").write_text(card.read_text(encoding="utf-8"), encoding="utf-8")
-
     allow = {name for name in ADAPTER_FILES if (args.adapter / name).exists()}
-    if (args.adapter / "README.md").exists():
-        allow.add("README.md")
+    allow.add("README.md")
     api.upload_folder(
         folder_path=str(args.adapter),
         repo_id=args.repo,
         repo_type="model",
         allow_patterns=list(allow),
-        ignore_patterns=["checkpoint-*", "*.pt", "optimizer.pt", "train_run.json"],
+        ignore_patterns=[
+            "checkpoint-*",
+            "*.pt",
+            "optimizer.pt",
+            "train_run.json",
+            "dpo_run.json",
+            "MODEL_CARD.md",
+        ],
     )
     visibility = "private" if args.private else "public"
     print(f"Uploaded {sorted(allow)} to {args.repo} ({visibility})")

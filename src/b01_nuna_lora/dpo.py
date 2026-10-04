@@ -4,13 +4,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
 
+from b01_nuna_lora.licenses import approved_base
 from b01_nuna_lora.preferences import load_preferences
+from b01_nuna_lora.scoring import fingerprint_adapter
 from b01_nuna_lora.train import (
     _filter_kwargs,
+    _vram_stats,
     apply_4bit_training_precision,
     bitsandbytes_config_from_kwargs,
     quantization_kwargs,
@@ -31,12 +36,15 @@ def main(argv: list[str] | None = None) -> int:
     quant = quantization_kwargs(cfg)
     if quant is None:
         raise SystemExit("DPO config must set load_in_4bit: true on an 8GB card.")
+    base_spec = approved_base(str(cfg.get("base_model") or ""), cfg.get("base_model_revision"))
+    base_revision = str(base_spec["revision"])
 
     rows = load_preferences(
         str(cfg["hf_dataset"]),
         str(cfg.get("hf_split") or "train"),
         max_samples=int(cfg["hf_max_samples"]),
         license_id=str(cfg["hf_license"]),
+        revision=str(cfg.get("hf_revision") or ""),
     )
     print(f"preference rows: {len(rows)} ({cfg['hf_license']})")
 
@@ -51,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("CUDA is required for DPO.")
     require_bitsandbytes()
 
-    tokenizer = AutoTokenizer.from_pretrained(str(cfg["base_model"]))
+    tokenizer = AutoTokenizer.from_pretrained(str(cfg["base_model"]), revision=base_revision)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     template = cfg.get("chat_template")
@@ -82,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
 
     base = AutoModelForCausalLM.from_pretrained(
         str(cfg["base_model"]),
+        revision=base_revision,
         quantization_config=bitsandbytes_config_from_kwargs(quant),
         device_map="auto",
     )
@@ -96,19 +105,28 @@ def main(argv: list[str] | None = None) -> int:
     init_kwargs, dropped_trainer = _filter_kwargs(DPOTrainer, trainer_kwargs)
     require_trainer_accepts_quantization(dropped_trainer, enabled=False)
     trainer = DPOTrainer(**init_kwargs)
+    torch.cuda.reset_peak_memory_stats()
+    started = time.monotonic()
     result = trainer.train()
     trainer.save_model(str(args.output))
     tokenizer.save_pretrained(args.output)
     summary = {
         "status": "completed",
+        "config": cfg,
         "base_model": cfg["base_model"],
+        "base_model_revision": base_revision,
+        "hf_revision": cfg.get("hf_revision"),
         "sft_adapter": str(args.adapter),
         "n_preferences": len(rows),
         "hf_dataset": cfg["hf_dataset"],
         "hf_license": cfg["hf_license"],
         "final_train_loss": getattr(result, "training_loss", None),
         "global_step": getattr(result, "global_step", None),
+        "duration_seconds": round(time.monotonic() - started, 2),
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+        **_vram_stats(torch),
     }
+    summary["adapter_sha256"] = fingerprint_adapter(args.output)
     args.output.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(summary, indent=2) + "\n"
     (args.output / "dpo_run.json").write_text(payload, encoding="utf-8")

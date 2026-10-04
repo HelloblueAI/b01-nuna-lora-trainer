@@ -9,8 +9,12 @@
 - `--allow-unverified-upload` can create only a private repo. Combining it with `--no-private` is refused.
 - Training refuses to start if the cached base safetensors contain non-finite values.
 - Measured UltraChat run (loss 1.074, 229 steps, 5,022 MiB) is in `docs/EVIDENCE.md`. That adapter failed the probe gate and is not a public release.
-
-## Unreleased
+- The 8GB post-training configs are `configs/qwen25_3b_post_sft.yaml` and `configs/qwen25_3b_post_dpo.yaml`. The 7B recipes are in `configs/unsupported/` because they do not fit an 8GB card.
+- Base-model and dataset revisions are pinned. Training checks the repository and revision against `src/b01_nuna_lora/licenses.py` instead of trusting a hand-written `hf_license`.
+- Hub upload writes a model card from the adapter's recorded base model. A public upload fails if that card, the training record, or the base-versus-adapter comparison is missing. A Qwen2.5-3B card uses `license: other` and "Built with Qwen". The TinyLlama `MODEL_CARD.md` is not copied onto a Qwen adapter.
+- Qwen2.5-3B-Instruct is documented as Qwen Research License, not MIT. See `BASE_MODEL_LICENSES.md`.
+- v0.2.0 is a GitHub source release. The incomplete wheel is not published to PyPI.
+- Runtime `__version__` is `0.2.0` and a test requires it to match `pyproject.toml`.
 
 ### Fixed
 
@@ -56,6 +60,10 @@
   torch.
 - `train_run.json` records the chat template path and SHA-256, and how many tokens the first
   example actually supervises.
+
+## Unreleased
+
+- No public Hugging Face upload and no v0.2.0 git tag. The 8,000-row SFT and DPO adapters both have full GSM8K, IFEval, and MMLU reports. Both regressed IFEval against the base model, so neither is a release.
 
 ## 0.1.0
 

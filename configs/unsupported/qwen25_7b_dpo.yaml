@@ -1,7 +1,7 @@
-# Does not fit an 8GB card. Use configs/qwen25_3b_post_dpo.yaml on an RTX 4060.
-# Preference stage after configs/qwen25_7b_sft.yaml. MIT UltraFeedback.
-# The SFT adapter is passed on the command line. This file is the data and the step size.
+# UNSUPPORTED on an 8GB card. This is not the recommended workflow.
+# Use configs/qwen25_3b_post_dpo.yaml. Preference stage after the 7B SFT file.
 base_model: Qwen/Qwen2.5-7B-Instruct
+base_model_revision: a09a35458c702b33eeacc393d103063234e8bc28
 chat_template: configs/qwen25_chat_template.jinja
 seed: 42
 epochs: 1
@@ -20,3 +20,4 @@ hf_dataset: HuggingFaceH4/ultrafeedback_binarized
 hf_split: train_prefs
 hf_max_samples: 4000
 hf_license: mit
+hf_revision: 3949bf5f8c17c394422ccfab0c31ea9c20bdeb85

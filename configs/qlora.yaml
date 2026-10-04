@@ -4,6 +4,7 @@
 # Training switches to bfloat16 automatically, because TRL stores QLoRA adapter
 # weights in bf16. Set gradient_checkpointing: true before moving to a 7B base.
 base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+base_model_revision: fe8a4ea1ffedaf415f4da2f062534de366a451e6
 chat_template: configs/tinyllama_chat_template.jinja
 assistant_only_loss: true
 seed: 42

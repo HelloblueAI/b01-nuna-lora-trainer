@@ -6,6 +6,7 @@ Two layers here:
      drops a kwarg we pass fails CI instead of surfacing the day someone publishes.
 """
 
+import json
 import sys
 import types
 from pathlib import Path
@@ -19,8 +20,17 @@ from b01_nuna_lora.upload import main as upload_main
 def _adapter(tmp_path: Path, weights: bytes = b"w") -> Path:
     directory = tmp_path / "adapter"
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "adapter_config.json").write_text('{"r": 8}', encoding="utf-8")
+    (directory / "adapter_config.json").write_text(
+        json.dumps(
+            {"r": 8, "base_model_name_or_path": "TinyLlama/TinyLlama-1.1B-Chat-v1.0"}
+        ),
+        encoding="utf-8",
+    )
     (directory / "adapter_model.safetensors").write_bytes(weights)
+    (directory / "train_run.json").write_text(
+        json.dumps({"config": {"epochs": 1}, "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0"}),
+        encoding="utf-8",
+    )
     return directory
 
 
@@ -31,6 +41,7 @@ def _passing_report(tmp_path: Path, adapter: Path) -> Path:
         [{"id": "identity-name", "passed": True, "required": True}],
         mode="generation",
         provenance={"adapter_path": str(adapter), "adapter_sha256": fingerprint_adapter(adapter)},
+        baseline=[{"id": "identity-name", "passed": True, "required": True}],
     )
     return path
 
@@ -209,6 +220,7 @@ def test_only_existing_adapter_files_are_listed(tmp_path, hub, monkeypatch):
     upload_main(["--adapter", str(adapter), "--repo", "demo/x", "--eval-report", str(report)])
 
     assert hub["upload_folder"]["allow_patterns"] == [
+        "README.md",
         "adapter_config.json",
         "adapter_model.safetensors",
     ]
@@ -216,11 +228,8 @@ def test_only_existing_adapter_files_are_listed(tmp_path, hub, monkeypatch):
     assert hub["upload_folder"]["folder_path"] == str(adapter)
 
 
-def test_model_card_is_resolved_relative_to_the_working_directory(tmp_path, hub, monkeypatch):
-    """Footgun worth pinning: upload.py reads ./MODEL_CARD.md, not the repo root.
-
-    Running upload from outside the repo silently publishes the adapter with no model card.
-    """
+def test_upload_outside_the_repo_still_writes_a_card(tmp_path, hub, monkeypatch):
+    """A missing ./MODEL_CARD.md used to publish with no card. That must fail closed."""
     adapter = _adapter(tmp_path)
     report = _passing_report(tmp_path, adapter)
     elsewhere = tmp_path / "elsewhere"
@@ -229,20 +238,39 @@ def test_model_card_is_resolved_relative_to_the_working_directory(tmp_path, hub,
 
     upload_main(["--adapter", str(adapter), "--repo", "demo/x", "--eval-report", str(report)])
 
-    assert not (adapter / "README.md").exists()
-    assert "README.md" not in hub["upload_folder"]["allow_patterns"]
+    card = (adapter / "README.md").read_text(encoding="utf-8")
+    assert "license: apache-2.0" in card
+    assert "README.md" in hub["upload_folder"]["allow_patterns"]
 
 
-def test_model_card_is_attached_as_readme(tmp_path, hub, monkeypatch):
+def test_working_directory_model_card_is_not_copied(tmp_path, hub, monkeypatch):
     adapter = _adapter(tmp_path)
     report = _passing_report(tmp_path, adapter)
-    (tmp_path / "MODEL_CARD.md").write_text("# card", encoding="utf-8")
-    monkeypatch.chdir(tmp_path)  # upload.py reads MODEL_CARD.md relative to the working dir
+    (tmp_path / "MODEL_CARD.md").write_text(
+        "---\nlicense: mit\n---\n# TinyLlama card\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
 
     upload_main(["--adapter", str(adapter), "--repo", "demo/x", "--eval-report", str(report)])
 
-    assert (adapter / "README.md").read_text(encoding="utf-8") == "# card"
+    card = (adapter / "README.md").read_text(encoding="utf-8")
+    assert "TinyLlama card" not in card
+    assert "license: apache-2.0" in card
     assert "README.md" in hub["upload_folder"]["allow_patterns"]
+
+
+def test_public_upload_without_a_base_model_fails_closed(tmp_path, hub):
+    adapter = _adapter(tmp_path)
+    (adapter / "adapter_config.json").write_text('{"r": 8}', encoding="utf-8")
+    report = _passing_report(tmp_path, adapter)
+    with pytest.raises(SystemExit, match="base_model_name_or_path"):
+        upload_main(
+            ["--adapter", str(adapter), "--repo", "demo/x", "--no-private",
+             "--eval-report", str(report)]
+        )
+    assert hub["create_repo"] is None
+    assert hub["upload_folder"] is None
 
 
 @pytest.mark.parametrize("env", ["HF_TOKEN", "HUGGINGFACE_API_KEY"])

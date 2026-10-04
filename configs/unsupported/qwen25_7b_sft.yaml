@@ -1,8 +1,8 @@
-# Does not fit an 8GB card. bitsandbytes refuses to offload a 4-bit 7B model onto CPU.
-# Use configs/qwen25_3b_post_sft.yaml on an RTX 4060.
-# Qwen2.5-7B-Instruct in 4-bit. Identity and safety rows are repeated so a large
-# general corpus cannot wash them out the way 2,000 UltraChat rows did.
+# UNSUPPORTED on an 8GB card. bitsandbytes refuses to offload a 4-bit 7B model onto CPU.
+# This is not the recommended workflow. Use configs/qwen25_3b_post_sft.yaml.
+# The Hub LICENSE file for Qwen2.5-7B-Instruct is Apache-2.0. Qwen2.5-3B-Instruct is not.
 base_model: Qwen/Qwen2.5-7B-Instruct
+base_model_revision: a09a35458c702b33eeacc393d103063234e8bc28
 chat_template: configs/qwen25_chat_template.jinja
 assistant_only_loss: true
 seed: 42
@@ -39,3 +39,4 @@ hf_dataset: HuggingFaceH4/ultrachat_200k
 hf_split: train_sft
 hf_max_samples: 8000
 hf_license: mit
+hf_revision: 8049631c405ae6576f93f445c6b8166f76f5505a
