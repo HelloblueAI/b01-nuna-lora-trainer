@@ -3,6 +3,25 @@ name: Bug
 description: Trainer, eval, or docs bug
 labels: [bug]
 body:
+  - type: dropdown
+    id: gpu
+    attributes:
+      label: GPU
+      description: University of Washington GPU access is unconfirmed. Mark Required only when the bug cannot be shown with --dry-run or --check-only.
+      options:
+        - Not required
+        - Required — do not start until a GPU is confirmed
+    validations:
+      required: true
+  - type: dropdown
+    id: data-license
+    attributes:
+      label: Data licensing
+      options:
+        - No new data or base model
+        - New data or a base model — license must be named
+    validations:
+      required: true
   - type: textarea
     id: what
     attributes:

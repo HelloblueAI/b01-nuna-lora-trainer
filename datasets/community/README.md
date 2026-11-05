@@ -9,6 +9,8 @@ To propose examples:
 3. No personal data and no production logs.
 4. Open a PR. CI validates JSON. A maintainer may merge a subset after review and eval.
 
+This folder is **data license**, not **needs GPU**. State the license in the PR. A laptop can prepare the file. Scoring it with generation eval waits until a GPU is confirmed.
+
 `general.json` in this folder is original Helloblue-authored MIT data. It is not part of `train.json`. `configs/qwen25_3b_qlora.yaml` appends it via `extra_data`.
 
 Do not edit `train.json` in the same PR unless a maintainer asks.

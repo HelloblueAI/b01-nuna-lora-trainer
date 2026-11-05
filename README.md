@@ -1,5 +1,7 @@
 # b01-nuna-lora-trainer
 
+**UW students:** [UW Student Projects: Start Here](https://github.com/HelloblueAI/.github/blob/main/profile/UW-STUDENT-PROJECTS.md). Claim one listed issue. GPU tasks stay closed until access is confirmed.
+
 Open-source workshop for single-GPU PEFT LoRA SFT. **This is not the production NUna system.** Production NUna is described only at [helloblue.ai/model-card](https://helloblue.ai/model-card). Training, eval, and any Hub upload from this repo do not change that system.
 
 The default recipe fine-tunes [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) for 30 epochs with LoRA r=16, alpha=32, dropout=0.05 on `q/k/v/o_proj` and `gate/up/down_proj`. The eval file has 17 probes (11 required, 6 advisory). `configs/qwen25_3b_qlora.yaml` and `configs/qwen25_3b_open_sft.yaml` are optional 3B QLoRA runs. The 2,000-row UltraChat run trained, then failed the probe gate. Numbers are in [`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
@@ -8,7 +10,7 @@ Measured results from real runs on an RTX 4060 — including a case where the ga
 caught the fine-tune destroying a capability the base model had — are in
 [`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
 
-**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Adding eval probes and licensed SFT data needs no GPU.
+**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Issues labeled [`needs-gpu`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/needs-gpu) wait until a machine is confirmed (University of Washington GPU access is unconfirmed). Issues labeled [`data-license`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/data-license) need a named license in the PR. Adding eval probes and original SFT JSON needs no GPU. Details are in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Community
 

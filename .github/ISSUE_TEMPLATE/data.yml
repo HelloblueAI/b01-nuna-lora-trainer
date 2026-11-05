@@ -3,6 +3,27 @@ name: Data or eval probe
 description: Propose licensed SFT or a held-out probe
 labels: [data]
 body:
+  - type: dropdown
+    id: gpu
+    attributes:
+      label: GPU
+      description: University of Washington GPU access is unconfirmed. Writing probes or community JSON does not need a GPU. Training and generation eval do.
+      options:
+        - Not required
+        - Required — do not start until a GPU is confirmed
+    validations:
+      required: true
+  - type: dropdown
+    id: data-license
+    attributes:
+      label: Data licensing
+      description: New training rows and Hub corpora need a named license. Qwen2.5-3B-Instruct is not MIT.
+      options:
+        - No new data or base model
+        - New data — license stated below
+        - Touches a base model or Hub corpus — see BASE_MODEL_LICENSES.md
+    validations:
+      required: true
   - type: textarea
     id: license
     attributes:
