@@ -26,7 +26,7 @@ size_categories:
 | --- | --- |
 | `identity-seed.json` | Smoke identity (Alpaca or converted to chat) |
 | `sft_extra.json` | Extra Helloblue-authored SFT |
-| `train.json` | Combined chat `messages` used by default train |
+| `train.json` | Combined chat `messages` used by default train (generated; regenerate with `python scripts/build_train.py`) |
 | `eval_probes.json` | Held-out prompts + matchers (not training targets) |
 | `community/` | Third-party PRs (see that README) |
 

@@ -13,13 +13,25 @@ sys.path.insert(0, str(ROOT / "src"))
 from b01_nuna_lora.data import load_records  # noqa: E402
 
 
-def main() -> None:
-    identity = load_records(ROOT / "datasets" / "identity-seed.json")
-    extra = json.loads((ROOT / "datasets" / "sft_extra.json").read_text(encoding="utf-8"))
+def build_train_text(root: Path) -> str:
+    """Return the JSON text for datasets/train.json.
+
+    Combines identity-seed.json (via load_records) with the messages of each
+    row in sft_extra.json. Output is byte-identical to the previous script.
+    """
+    identity = load_records(root / "datasets" / "identity-seed.json")
+    extra = json.loads((root / "datasets" / "sft_extra.json").read_text(encoding="utf-8"))
     extra_rows = [{"messages": row["messages"]} for row in extra]
     combined = identity + extra_rows
+    return json.dumps(combined, indent=2) + "\n"
+
+
+def main() -> None:
+    text = build_train_text(ROOT)
     out = ROOT / "datasets" / "train.json"
-    out.write_text(json.dumps(combined, indent=2) + "\n", encoding="utf-8")
+    out.write_text(text, encoding="utf-8")
+    # Count rows for the print message (same as before).
+    combined = json.loads(text)
     print(f"wrote {len(combined)} rows → {out}")
 
 
