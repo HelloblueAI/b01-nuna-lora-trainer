@@ -6,6 +6,20 @@ Please read `GOVERNANCE.md`, `CODE_OF_CONDUCT.md`, and `datasets/README.md`.
 
 A merged pull request is credited in the Contributors section of `README.md`: your GitHub handle and a short line on what you added.
 
+## GPU and data licensing
+
+University of Washington GPU access is unconfirmed. Do not start a task marked **needs GPU** until a maintainer says a machine is available. `--dry-run` and `--check-only` run on a laptop and in CI.
+
+| Mark | Meaning |
+| --- | --- |
+| **needs GPU** | Training, DPO, generation eval, or GSM8K / IFEval / MMLU. The contribution is unfinished without a CUDA run. |
+| **no GPU** | Docs, tests, probe files, and community JSON. CI can review the PR. |
+| **data license** | New or changed training rows, a Hub corpus, or a base model. Name the license in the PR. See `BASE_MODEL_LICENSES.md`. |
+
+Qwen2.5-3B-Instruct is the Qwen Research License, not MIT. A new corpus is accepted only when its repository and revision are on the allowlist in `src/b01_nuna_lora/licenses.py`, and the config's `hf_license` matches that entry. Original Helloblue JSON under `datasets/` is MIT.
+
+Issues use the labels `needs-gpu` and `data-license`. A good first issue is **no GPU** unless the title says otherwise.
+
 ## You can contribute
 
 - Licensed SFT JSON under `datasets/community/` (your original work or a stated license)
@@ -36,7 +50,7 @@ python -m b01_nuna_lora.train --dry-run
 python -m b01_nuna_lora.eval --check-only
 ```
 
-GPU training is optional and local. Official Hub tags require a **generation** eval report.
+GPU training is optional for a docs or data PR and required before a maintainer promotes a probe to `"required": true` or tags a Hub revision. That verification is **needs GPU**, and it waits while UW GPU access is unconfirmed. Official Hub tags require a **generation** eval report.
 
 ## Pull requests
 

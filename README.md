@@ -8,7 +8,7 @@ Measured results from real runs on an RTX 4060 — including a case where the ga
 caught the fine-tune destroying a capability the base model had — are in
 [`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
 
-**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Adding eval probes and licensed SFT data needs no GPU.
+**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Issues labeled [`needs-gpu`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/needs-gpu) wait until a machine is confirmed (University of Washington GPU access is unconfirmed). Issues labeled [`data-license`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/data-license) need a named license in the PR. Adding eval probes and original SFT JSON needs no GPU. Details are in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Community
 
