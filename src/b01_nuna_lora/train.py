@@ -14,7 +14,7 @@ from typing import Any
 
 import yaml
 
-from b01_nuna_lora.data import load_hf_messages, load_many
+from b01_nuna_lora.data import assemble_local_rows, load_hf_messages
 from b01_nuna_lora.licenses import approved_base
 from b01_nuna_lora.scoring import fingerprint_adapter, fingerprint_file
 
@@ -289,13 +289,17 @@ def main(argv: list[str] | None = None) -> int:
     if isinstance(extra, str):
         extra = [extra]
     data_paths.extend(Path(path) for path in extra)
-    records = load_many(data_paths)
     repeats = int(cfg.get("local_repeats") or 1)
-    if repeats < 1:
-        raise SystemExit(f"local_repeats must be >= 1, got {repeats}")
-    if repeats > 1:
-        records = records * repeats
-        print(f"repeated local rows x{repeats} → {len(records)}")
+    groups = cfg.get("repeat_groups")
+    try:
+        records = assemble_local_rows(
+            data_paths,
+            local_repeats=repeats,
+            repeat_groups=groups if isinstance(groups, list) else None,
+        )
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    print(f"local rows {len(records)} (base repeat x{repeats})")
     hf_repo = cfg.get("hf_dataset")
     if hf_repo:
         hf_records = load_hf_messages(

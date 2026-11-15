@@ -60,6 +60,62 @@ def load_many(paths: list[str | Path], *, min_records: int = 10) -> list[dict[st
     return records
 
 
+def assemble_local_rows(
+    paths: list[str | Path],
+    *,
+    local_repeats: int = 1,
+    repeat_groups: list[dict[str, Any]] | None = None,
+    min_records: int = 10,
+) -> list[dict[str, Any]]:
+    """Repeat local files, with optional per-file weights.
+
+    Without groups, the concatenated files are repeated as one block, matching
+    the older `local_repeats` behavior. A group overrides that weight for the
+    paths it names. Every grouped path has to be one of `paths`, and a path
+    can belong to only one group.
+    """
+    if local_repeats < 1:
+        raise ValueError(f"local_repeats must be >= 1, got {local_repeats}")
+    loaded: dict[str, list[dict[str, Any]]] = {}
+    for path in paths:
+        key = str(path)
+        if key in loaded:
+            raise ValueError(f"training file listed twice: {key}")
+        loaded[key] = load_records(path, min_records=1)
+    weights = {key: local_repeats for key in loaded}
+    claimed: set[str] = set()
+    for group in repeat_groups or []:
+        group_paths = group.get("paths")
+        if not isinstance(group_paths, list) or not group_paths:
+            raise ValueError("each repeat group needs a non-empty paths list")
+        try:
+            times = int(group["repeats"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("each repeat group needs an integer repeats") from exc
+        if times < 1:
+            raise ValueError(f"repeat group repeats must be >= 1, got {times}")
+        for raw in group_paths:
+            key = str(raw)
+            if key not in loaded:
+                raise ValueError(f"repeat group path is not a training file: {key}")
+            if key in claimed:
+                raise ValueError(f"repeat group path is listed twice: {key}")
+            claimed.add(key)
+            weights[key] = times
+    if not repeat_groups:
+        rows: list[dict[str, Any]] = []
+        for path in paths:
+            rows.extend(loaded[str(path)])
+        rows = rows * local_repeats
+    else:
+        rows = []
+        for path in paths:
+            rows.extend(loaded[str(path)] * weights[str(path)])
+    if len(rows) < min_records:
+        raise ValueError(f"Need at least {min_records} records, got {len(rows)}")
+    return rows
+
+
 ALLOWED_CORPUS_LICENSES = frozenset({"mit", "apache-2.0"})
 
 

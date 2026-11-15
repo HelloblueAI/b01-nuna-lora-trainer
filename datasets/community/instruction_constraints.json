@@ -1,0 +1,236 @@
+[
+  {
+    "messages": [
+      {"role": "user", "content": "Reply in exactly two sentences. Explain why a lid belongs on a pot of soup."},
+      {"role": "assistant", "content": "A lid keeps heat over the soup, so it simmers instead of cooling off. It also stops splashes from reaching the stove."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Answer in three bullet points, and no other text. List what to pack for a rainy walk."},
+      {"role": "assistant", "content": "- A coat with a hood\n- Shoes that can get wet\n- A small towel for the doorway"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Use the word cedar exactly once. Describe a park bench."},
+      {"role": "assistant", "content": "The bench is made of cedar, with a high back and room for two people to sit facing the pond."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write one sentence of exactly eight words about a red bicycle."},
+      {"role": "assistant", "content": "The red bicycle leans against the blue gate."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Respond in lowercase only. Say how to tell when rice is done."},
+      {"role": "assistant", "content": "the grains are tender all the way through and no hard center remains."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Return only a JSON object with keys title and minutes. The task is boiling an egg."},
+      {"role": "assistant", "content": "{\"title\": \"Boil an egg\", \"minutes\": 9}"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Do not use the letter q. Give a short tip for watering a fern."},
+      {"role": "assistant", "content": "Water the soil when it feels dry on top, and let the extra drain away."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Start your reply with Yes. Then name one reason to label a freezer box."},
+      {"role": "assistant", "content": "Yes. A label tells you what is inside without opening the box and warming the food."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "End your reply with the exact sentence: That is the whole method. Explain how to fold a towel."},
+      {"role": "assistant", "content": "Lay the towel flat, fold it in half, then fold it in half again so the edges meet. That is the whole method."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Give exactly four numbered steps for making toast. Do not add an introduction."},
+      {"role": "assistant", "content": "1. Put a slice of bread in the toaster.\n2. Choose a browning level.\n3. Start the toaster and wait until it pops.\n4. Lift the toast onto a plate."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Answer with a single word: the usual color of a ripe banana."},
+      {"role": "assistant", "content": "Yellow"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write two lines. The first line is a city. The second line is a season."},
+      {"role": "assistant", "content": "Lisbon\nSpring"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Include the phrase spare key and no other instructions. Tell a neighbor how to water a plant."},
+      {"role": "assistant", "content": "The spare key is under the blue pot; give the plant one cup of water if the soil is dry."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Use at most twelve words. Say what a compass needle points toward."},
+      {"role": "assistant", "content": "A compass needle points toward magnetic north."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Reply as a markdown table with columns Item and Place. Rows: keys, coat."},
+      {"role": "assistant", "content": "| Item | Place |\n| --- | --- |\n| keys | hook by the door |\n| coat | closet |"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Do not mention numbers. Describe how long to steep black tea."},
+      {"role": "assistant", "content": "Steep black tea until the color turns deep and the smell is strong, then take the bag out."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Ask exactly one question, and nothing else. You need the reader's favorite soup."},
+      {"role": "assistant", "content": "Which soup do you like best?"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write the reply in past tense. Someone closed a window before a storm."},
+      {"role": "assistant", "content": "She closed the window before the storm reached the street."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Give three examples of wooden instruments, separated by commas, with no extra words."},
+      {"role": "assistant", "content": "violin, guitar, clarinet"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Begin with the word Because. Explain why a candle needs a holder."},
+      {"role": "assistant", "content": "Because a holder keeps the candle upright and catches the wax."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Answer in Spanish with one sentence. Say that the library is open on Saturday."},
+      {"role": "assistant", "content": "La biblioteca abre el sábado."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Produce exactly five words about a quiet morning."},
+      {"role": "assistant", "content": "Steam rises from the cup."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "List two reasons to wear a helmet on a bike. Put each reason on its own line, prefixed with a dash."},
+      {"role": "assistant", "content": "- It protects your head if you fall.\n- It is required on many roads."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Do not use a comma. Describe a small kitchen."},
+      {"role": "assistant", "content": "The kitchen has one sink and a window over the counter."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Reply with only the capital of Norway."},
+      {"role": "assistant", "content": "Oslo"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write a haiku about snow on a mailbox. Use three lines."},
+      {"role": "assistant", "content": "White cap on the box\nLetters wait until midday\nBoots mark the front step"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Include both words lemon and cloth. Say how to clean a cutting board."},
+      {"role": "assistant", "content": "Rub the board with lemon, then wipe it with a clean cloth and let it dry."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Your whole answer must be a question about train times."},
+      {"role": "assistant", "content": "Does the evening train still leave at half past six?"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Use the second person. Tell someone how to check a bicycle tire."},
+      {"role": "assistant", "content": "You press the tire with your thumb, and you add air if it dents easily."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Give the answer as Title: then the name of a tool that drives nails."},
+      {"role": "assistant", "content": "Title: hammer"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write four words, then stop. Topic: a closed book."},
+      {"role": "assistant", "content": "The book stays shut."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Avoid the words good and bad. Judge whether wool works in summer."},
+      {"role": "assistant", "content": "Wool traps heat, so a thick wool sweater is a poor match for a hot afternoon."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Respond with one imperative sentence about locking a door."},
+      {"role": "assistant", "content": "Turn the key until the bolt clicks."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Name three green vegetables in alphabetical order, one per line."},
+      {"role": "assistant", "content": "broccoli\ncabbage\nspinach"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "The reply must contain the digit 7 and be about a bus route."},
+      {"role": "assistant", "content": "Bus 7 stops at the market before it reaches the station."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Write no more than one sentence. Say where to store onions."},
+      {"role": "assistant", "content": "Store onions in a cool dry cupboard, away from potatoes."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Format the answer as First: and Second:. First is a breakfast food. Second is a drink."},
+      {"role": "assistant", "content": "First: oatmeal\nSecond: tea"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Do not greet the reader. State the boiling point of water at sea level."},
+      {"role": "assistant", "content": "Water boils at 100 degrees Celsius at sea level."}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Repeat the word pause twice in the answer, and tell someone to rest between sprints."},
+      {"role": "assistant", "content": "Pause after each sprint, then pause again until your breathing slows."}
+    ]
+  }
+]

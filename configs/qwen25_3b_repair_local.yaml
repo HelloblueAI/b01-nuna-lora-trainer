@@ -1,0 +1,50 @@
+# Local repair for an 8GB card. No UltraChat slice. Identity files are repeated
+# more than the constraint file, and that file more than the general rows.
+# The measured probe and IFEval scores for this file are in docs/EVIDENCE.md.
+# Qwen2.5-3B-Instruct is under the Qwen Research License.
+base_model: Qwen/Qwen2.5-3B-Instruct
+base_model_revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
+chat_template: configs/qwen25_chat_template.jinja
+assistant_only_loss: true
+seed: 42
+epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 2.0e-5
+max_length: 512
+warmup_steps: 10
+save_steps: 500
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+fp16: true
+fresh_start: true
+gradient_checkpointing: true
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_use_double_quant: true
+bnb_4bit_compute_dtype: bfloat16
+local_repeats: 4
+repeat_groups:
+  - paths:
+      - datasets/train.json
+      - datasets/community/identity_frames.json
+      - datasets/community/identity_jailbreaks.json
+    repeats: 40
+  - paths:
+      - datasets/community/instruction_constraints.json
+    repeats: 8
+extra_data:
+  - datasets/community/general.json
+  - datasets/community/safety_refusals.json
+  - datasets/community/instruction_constraints.json
+  - datasets/community/identity_frames.json
+  - datasets/community/identity_jailbreaks.json
