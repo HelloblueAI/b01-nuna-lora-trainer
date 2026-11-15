@@ -1,0 +1,56 @@
+# Repair recipe for an 8GB card. The 8,000-row run at 1e-4 lifted GSM8K and MMLU
+# and dropped IFEval. A uniform x20 repeat at 2e-5 then lost two identity probes.
+# Identity files are repeated more than the constraint and general files. A 400-row
+# UltraChat slice is included. The measured IFEval for that mix is in docs/EVIDENCE.md.
+# Qwen2.5-3B-Instruct is under the Qwen Research License. See BASE_MODEL_LICENSES.md.
+base_model: Qwen/Qwen2.5-3B-Instruct
+base_model_revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
+chat_template: configs/qwen25_chat_template.jinja
+assistant_only_loss: true
+seed: 42
+epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 2.0e-5
+max_length: 512
+warmup_steps: 10
+save_steps: 500
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+fp16: true
+fresh_start: true
+gradient_checkpointing: true
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_use_double_quant: true
+bnb_4bit_compute_dtype: bfloat16
+local_repeats: 8
+repeat_groups:
+  - paths:
+      - datasets/train.json
+      - datasets/community/identity_frames.json
+      - datasets/community/identity_jailbreaks.json
+    repeats: 40
+  - paths:
+      - datasets/community/instruction_constraints.json
+    repeats: 4
+extra_data:
+  - datasets/community/general.json
+  - datasets/community/safety_refusals.json
+  - datasets/community/instruction_constraints.json
+  - datasets/community/identity_frames.json
+  - datasets/community/identity_jailbreaks.json
+hf_dataset: HuggingFaceH4/ultrachat_200k
+hf_split: train_sft
+hf_max_samples: 400
+hf_license: mit
+hf_revision: 8049631c405ae6576f93f445c6b8166f76f5505a

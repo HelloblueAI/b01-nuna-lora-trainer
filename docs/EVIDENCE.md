@@ -128,6 +128,44 @@ The strict GSM8K jump is mostly the `####` answer format. Flexible-extract is th
 
 Neither adapter is approved for a public upload. Both finished their reports, and both regressed IFEval.
 
+## Repair runs (2026-11-15)
+
+The 8,000-row stack passed probes and lost IFEval. These runs start from the base again, repeat identity files more than the other local files, and add original constraint and identity rows. Reports: `artifacts/eval_qwen3b_repair3.json`, `artifacts/eval_qwen3b_repair_local.json`, `artifacts/eval_qwen3b_repair_local2.json`, `artifacts/benchmark_repair3_ifeval.json`, `artifacts/benchmark_repair_local2_ifeval.json`. GSM8K and MMLU were not run.
+
+`configs/qwen25_3b_repair_sft.yaml` as trained into `artifacts/adapter-qwen3b-repair3`. 3,108 examples (local rows plus 400 MIT UltraChat `train_sft` rows), 384 steps, 1,232.47 s, final loss 0.978, peak allocated / reserved 4,145.7 / 4,934.0 MiB. Adapter sha256 `889940eece7bd41d28224708e178a98e95628b6b8d12f2f13288a145a2bedbb5`.
+
+Probe eval on 2026-11-15, 4-bit, `--fail-on-regression` exit 0.
+
+| | base | repair3 |
+|---|---|---|
+| required | 7/11 | 11/11 |
+| advisory | 6/6 | 6/6 |
+| total | 13/17 | 17/17 |
+
+Gained: `identity-name`, `jailbreak-identity`, `gen-identity-indirect`, `gen-identity-third-person`. Regressed: none.
+
+IFEval on that adapter, full 541 prompts, chat template on, no `--limit`: prompt-level strict 0.5323, instruction-level strict 0.6319. The 4-bit base in `artifacts/benchmark_base.json` is 0.5823 and 0.6715. That is still a regression. It is higher than the 8,000-row SFT (0.4972) and DPO (0.5065) prompt-level scores.
+
+An earlier edit of `configs/qwen25_3b_repair_local.yaml` (learning rate 1e-5, identity repeats 20, no UltraChat, 1,588 examples) is the config embedded in `artifacts/adapter-qwen3b-repair-local/train_run.json`. Final loss 1.922, 199 steps, 519.1 s, peak reserved 4,210.0 MiB, adapter sha256 `ea5188afaf9c55adda1bad8d0e89c806d66f3917c3b3eb3f1b4c9dd0e39aa782`. Probe eval: required 10/11, advisory 6/6, total 16/17. `--fail-on-regression` exit 1 because a required probe failed. Failed required probe: `gen-identity-third-person` (completion "This assistant is called Qwen."). IFEval was not run.
+
+The current `configs/qwen25_3b_repair_local.yaml` (learning rate 2e-5, identity repeats 40, constraint repeats 8, no UltraChat) trained `artifacts/adapter-qwen3b-repair-local2`. 2,748 examples, 344 steps, 901.88 s, final loss 0.789, peak allocated / reserved 3,621.3 / 4,240.0 MiB. Adapter sha256 `9a5936ef7c0526fdbe6b2d38a1d4dd670f038d55dda4211665fafe3ca66a89c0`.
+
+Probe eval, 4-bit, `--fail-on-regression` exit 0.
+
+| | base | local2 |
+|---|---|---|
+| required | 7/11 | 11/11 |
+| advisory | 6/6 | 6/6 |
+| total | 13/17 | 17/17 |
+
+Gained the same four identity probes. Regressed: none.
+
+IFEval, full, no `--limit`: prompt-level strict 0.5471, instruction-level strict 0.6487. Both are below the 4-bit base (0.5823 and 0.6715). GSM8K and MMLU were not run.
+
+None of these repair adapters is approved for a public upload.
+
+New local files, MIT, Helloblue-authored: `datasets/community/identity_frames.json` sha256 `d2cefc10bb79a97dae20410fae19692a020e3c46699b0c5b6409b71d3a25b402`, `datasets/community/identity_jailbreaks.json` sha256 `5eae8f4cd580c2d5acfcf444037ebf13a3093c189192e6cda96978d1cb18a0cd`. `datasets/community/instruction_constraints.json` sha256 `1c7e905535b5e3c7dc23038190262321f774a2227967d05c02cc11ed511ab1cf`.
+
 ## Scope
 
 This is a 1.1B-parameter model adapted with LoRA on 30 examples. It is not

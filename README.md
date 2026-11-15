@@ -78,7 +78,7 @@ python -m b01_nuna_lora.train \
   --output outputs/adapter
 ```
 
-The 8GB post-training path is `configs/qwen25_3b_post_sft.yaml` (Qwen2.5-3B-Instruct in 4-bit, local identity and safety rows repeated, then 8,000 MIT UltraChat rows) and `configs/qwen25_3b_post_dpo.yaml` (MIT UltraFeedback). Qwen2.5-3B-Instruct is under the Qwen Research License, not MIT or Apache 2.0. A Qwen adapter is not commercially usable without a separate license from Alibaba. The 7B configs are unsupported on this card and live in `configs/unsupported/`. The 2,000-row UltraChat adapter failed the probe gate and is not a release. Nothing is uploaded until `--fail-on-regression` exits 0 and the generated model card matches the base model.
+The 8GB post-training path is `configs/qwen25_3b_post_sft.yaml` (Qwen2.5-3B-Instruct in 4-bit, local identity and safety rows repeated, then 8,000 MIT UltraChat rows) and `configs/qwen25_3b_post_dpo.yaml` (MIT UltraFeedback). Qwen2.5-3B-Instruct is under the Qwen Research License, not MIT or Apache 2.0. A Qwen adapter is not commercially usable without a separate license from Alibaba. The 7B configs are unsupported on this card and live in `configs/unsupported/`. The 2,000-row UltraChat adapter failed the probe gate and is not a release. The later repair in `configs/qwen25_3b_repair_local.yaml` passes the probe gate and still scores below the base model on IFEval, so it is not a release either. Numbers are in [`docs/EVIDENCE.md`](./docs/EVIDENCE.md). Nothing is uploaded until `--fail-on-regression` exits 0 and the generated model card matches the base model.
 
 Comparable scores, separate from the probe gate:
 
