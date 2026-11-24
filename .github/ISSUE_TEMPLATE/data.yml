@@ -7,10 +7,10 @@ body:
     id: gpu
     attributes:
       label: GPU
-      description: University of Washington GPU access is unconfirmed. Writing probes or community JSON does not need a GPU. Training and generation eval do.
+      description: UW Bothell has confirmed shared NVIDIA GPUs with at least 8 GB VRAM for the student projects. Student access and training scheduling will be coordinated with UW faculty. Writing probes or community JSON does not need a GPU. Training and generation eval do.
       options:
         - Not required
-        - Required — do not start until a GPU is confirmed
+        - Required — schedule access with UW faculty
     validations:
       required: true
   - type: dropdown
