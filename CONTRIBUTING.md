@@ -8,7 +8,7 @@ A merged pull request is credited in the Contributors section of `README.md`: yo
 
 ## GPU and data licensing
 
-University of Washington GPU access is unconfirmed. Do not start a task marked **needs GPU** until a maintainer says a machine is available. `--dry-run` and `--check-only` run on a laptop and in CI.
+UW Bothell has confirmed shared NVIDIA GPUs with at least 8 GB VRAM for the student projects. Student access and training scheduling will be coordinated with UW faculty. `--dry-run` and `--check-only` run on a laptop and in CI.
 
 | Mark | Meaning |
 | --- | --- |
@@ -50,7 +50,7 @@ python -m b01_nuna_lora.train --dry-run
 python -m b01_nuna_lora.eval --check-only
 ```
 
-GPU training is optional for a docs or data PR and required before a maintainer promotes a probe to `"required": true` or tags a Hub revision. That verification is **needs GPU**, and it waits while UW GPU access is unconfirmed. Official Hub tags require a **generation** eval report.
+GPU training is optional for a docs or data PR and required before a maintainer promotes a probe to `"required": true` or tags a Hub revision. That verification is **needs GPU**. Student access and training scheduling will be coordinated with UW faculty. Official Hub tags require a **generation** eval report.
 
 ## Pull requests
 

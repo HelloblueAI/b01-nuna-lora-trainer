@@ -5,6 +5,6 @@
 ## Checklist
 
 - [ ] No user chats, credentials, or production code
-- [ ] GPU: this PR does not need a GPU, or a generation-eval report is attached. Do not claim a GPU result while UW GPU access is unconfirmed.
+- [ ] GPU: this PR does not need a GPU, or a generation-eval report is attached. Do not claim a GPU result that was not measured. Student access and training scheduling are coordinated with UW faculty.
 - [ ] Data licensing: no new rows, corpus, or base model, or the license is named and matches `BASE_MODEL_LICENSES.md`
 - [ ] `pytest` and `ruff check .` pass locally (or CI will)

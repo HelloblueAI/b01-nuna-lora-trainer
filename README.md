@@ -1,6 +1,6 @@
 # b01-nuna-lora-trainer
 
-**UW students:** [UW Student Projects: Start Here](https://github.com/HelloblueAI/.github/blob/main/profile/UW-STUDENT-PROJECTS.md). Claim one listed issue. GPU tasks stay closed until access is confirmed.
+**UW students:** [UW Student Projects: Start Here](https://github.com/HelloblueAI/.github/blob/main/profile/UW-STUDENT-PROJECTS.md). Claim one listed issue. UW Bothell has confirmed shared NVIDIA GPUs with at least 8 GB VRAM for the student projects. Student access and training scheduling will be coordinated with UW faculty.
 
 Open-source workshop for single-GPU PEFT LoRA SFT. **This is not the production NUna system.** Production NUna is described only at [helloblue.ai/model-card](https://helloblue.ai/model-card). Training, eval, and any Hub upload from this repo do not change that system.
 
@@ -10,7 +10,7 @@ Measured results from real runs on an RTX 4060 — including a case where the ga
 caught the fine-tune destroying a capability the base model had — are in
 [`docs/EVIDENCE.md`](./docs/EVIDENCE.md).
 
-**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Issues labeled [`needs-gpu`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/needs-gpu) wait until a machine is confirmed (University of Washington GPU access is unconfirmed). Issues labeled [`data-license`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/data-license) need a named license in the PR. Adding eval probes and original SFT JSON needs no GPU. Details are in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+**Looking to contribute?** See our [Good First Issues](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/good%20first%20issue) and [Help Wanted](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/help%20wanted) tasks. Issues labeled [`needs-gpu`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/needs-gpu) use those shared GPUs. Student access and training scheduling will be coordinated with UW faculty. Issues labeled [`data-license`](https://github.com/HelloblueAI/b01-nuna-lora-trainer/labels/data-license) need a named license in the PR. Adding eval probes and original SFT JSON needs no GPU. Details are in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Community
 
